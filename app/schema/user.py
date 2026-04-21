@@ -16,5 +16,5 @@ class UserLoginResponse(UserBase):
     last_name : str | None = None
     name : str | None = None
     description : str | None = None
-    role : int | None = None
+    role_name : str | None = None
     key : Key | None = None

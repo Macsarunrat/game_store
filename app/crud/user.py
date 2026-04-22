@@ -46,3 +46,11 @@ async def login(db: Session, username, password):
         
         return results
     return None
+
+
+async def authenticate_user(db: Session,username: str):
+    sql_query = text('SELECT username FROM "user" WHERE username= :username')
+    username = db.exec(sql_query,params={'username': username}).mappings().first()
+    if not username:
+        return None
+    return username

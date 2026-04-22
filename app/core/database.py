@@ -15,3 +15,4 @@ def create_db_and_tb():
     from app.model.shop import Shop
     from app.model.user import Role,Permission,User
     SQLModel.metadata.create_all(engine)
+

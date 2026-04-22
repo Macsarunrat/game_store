@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, status, HTTPException
 from ..dependencies import DbSession
 from typing import Annotated
-from ..schema.user import UserLogin,UserLoginResponse
+from ..schema.user import UserLogin,UserLoginResponse,AccessToken,RefreshToken
 from ..schema.template import ResponseTemplate,ResponseTemplateConstructor
 from ..crud import user as crud_user
+from ..core.authentication import create_access_token,create_refresh_token,decode_jwt
+from dotenv import load_dotenv
+
+load_dotenv()
 
 router = APIRouter(
     prefix="/user",
@@ -22,12 +26,35 @@ async def login(db : DbSession, body : UserLogin):
                 401,'UNORTHORIZED','username หรือ password ไม่ถูกต้อง',None
                 )
         
+        access_key = create_access_token({'sub':username})
+        refresh_key = create_refresh_token({'sub':username})
+
+        result.update({'token':{
+            'access_key': access_key,
+            'refresh_key' : refresh_key
+        }})
+        
+        
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail=f"Error {e}")
 
     return ResponseTemplateConstructor(
-        200,'ok','Login successfully',result
+        200,'OK','Login successfully',result
         )
 
 
+@router.post('/refresh', response_model=ResponseTemplate[AccessToken])
+async def refresh_key(data: RefreshToken, db : DbSession):
+    payload = decode_jwt(data.refresh_key)
+    if not payload:
+        return ResponseTemplateConstructor(401,'UNORTHORIZED','ไม่พบ refresh key', None)
+    username = payload
+    user = await crud_user.authenticate_user(db=db,username=username)
+    new_access_key = create_access_token({'sub':user['username']})
 
+    reponse = {'access_key': new_access_key,
+                'type': 'bearer'
+               }
+    
+    return ResponseTemplateConstructor(200,'OK','create access key successfully',reponse)
+    

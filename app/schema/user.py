@@ -1,8 +1,16 @@
 from pydantic import BaseModel
 
-class Key(BaseModel):
+class AccessToken(BaseModel):
+    access_key : str
+    type : str | None = None
+
+class RefreshToken(BaseModel):
+    refresh_key : str
+
+class TOKEN(BaseModel):
     access_key : str
     refresh_key : str
+
 
 class UserBase(BaseModel):
     username : str
@@ -17,4 +25,4 @@ class UserLoginResponse(UserBase):
     name : str | None = None
     description : str | None = None
     role_name : str | None = None
-    key : Key | None = None
+    token : TOKEN | None = None

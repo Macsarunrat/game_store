@@ -13,7 +13,7 @@ class Role(SQLModel,table=True):
 
 class User(SQLModel,table=True):
     id : int | None = Field(primary_key=True)
-    username : str 
+    username : str = Field(unique=True)
     password : str
     first_name : str
     last_name :str

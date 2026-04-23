@@ -11,6 +11,6 @@ def create_db_and_tb():
     from app.model.game import Game,Catagory,Game_catagory
     from app.model.image import Image
     from app.model.order import Order
-    from app.model.user import Role,Permission,User
+    from app.model.user import Role,User
     SQLModel.metadata.create_all(engine)
 

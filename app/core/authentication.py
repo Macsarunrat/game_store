@@ -39,20 +39,18 @@ def decode_jwt(token:str):
     except PyJWTError:
         return None
 
-def decode_access_key(acceses_key :str):
+def decode_role(acceses_key :str):
     try:
         payload = jwt.decode(acceses_key,SECRET_KEY,algorithms=ALGORITHM)
         user = payload.get('sub')
-        permissions = payload.get('permission')
+        role_name = payload.get('role_name')
+        print(role_name)
         if not user:
-            return None
-        
-        if not permissions:
-            return None
-        
+            return None 
+        if not role_name:
+            return None 
 
-
-        return permissions
-    except PyJWTError:
-        return None
+        return role_name
+    except PyJWTError as e:
+        return print(f"error {e}")
 

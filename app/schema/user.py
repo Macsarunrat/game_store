@@ -22,7 +22,5 @@ class UserLogin(UserBase):
 class UserLoginResponse(UserBase):
     first_name: str | None = None
     last_name : str | None = None
-    name : str | None = None
-    description : str | None = None
     role_name : str | None = None
     token : TOKEN | None = None

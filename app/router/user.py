@@ -26,10 +26,11 @@ async def login(db : DbSession, body : UserLogin):
                 401,'UNORTHORIZED','username หรือ password ไม่ถูกต้อง',None
                 )
         
-        permissions = await crud_user.get_role_and_permission(db=db,username=username)
+        #permissions = await crud_user.get_role_and_permission(db=db,username=username)
+        role_name = result['role_name']
 
 
-        access_key = create_access_token({'sub':username,'permission':permissions,'jti':int(uuid.uuid4())})
+        access_key = create_access_token({'sub':username,'role_name': role_name,'jti':str(uuid.uuid4())})
         refresh_key = create_refresh_token({'sub':username})
 
         result.update({'token':{

@@ -15,4 +15,6 @@ class User(SQLModel,table=True):
     id : int | None = Field(primary_key=True)
     username : str 
     password : str
+    first_name : str
+    last_name :str
     role_id : int = Field(foreign_key="role.id")

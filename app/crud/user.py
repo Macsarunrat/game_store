@@ -54,3 +54,16 @@ async def authenticate_user(db: Session,username: str):
     if not username:
         return None
     return username
+
+
+
+async def get_role_and_permission(db: Session, username: str):
+    sql_query = text(
+        'SELECT p.name as "permission" FROM "user" u ' \
+        'JOIN role ON u.role_id = role.id ' \
+        'JOIN permission p ON role.id = p.role_id ' \
+        'WHERE u.username = :username'
+    )
+    results = db.exec(sql_query,params={'username':username}).scalars().all()
+    print(results)
+    return results

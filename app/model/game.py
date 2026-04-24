@@ -11,6 +11,7 @@ class Game(SQLModel,table=True):
     description : str
     price : int
     catagory : list["Catagory"] = Relationship(back_populates="game", link_model=Game_catagory)
+    is_delete : bool = False
 
 
 class Catagory(SQLModel,table=True):

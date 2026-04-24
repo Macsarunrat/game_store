@@ -20,6 +20,7 @@ class UserLogin(UserBase):
     password : str
 
 class UserLoginResponse(UserBase):
+    user_id : int 
     first_name: str | None = None
     last_name : str | None = None
     role_name : str | None = None

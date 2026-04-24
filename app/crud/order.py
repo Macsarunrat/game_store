@@ -4,7 +4,7 @@ from fastapi import HTTPException
 
 async def get_order(db:Session):
     sql_query = text(
-        'SELECT o.id AS "order_id", u.first_name, u.last_name, o.date, g.name AS "game_name" FROM "order" o ' \
+        'SELECT o.id AS "order_id", u.first_name, u.last_name, o.date, g.name AS "game_name", u.id AS "user_id" FROM "order" o ' \
         'JOIN game g ON o.game_id = g.id ' \
         'JOIN "user" u ON o.user_id = u.id')
     results = db.exec(sql_query).mappings().all()

@@ -8,6 +8,7 @@ class OrderBase(BaseModel):
 
 class OrderResponse(OrderBase):
     order_id : int
+    user_id : int
     first_name : str
     last_name : str
     game_name : str

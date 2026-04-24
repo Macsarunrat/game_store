@@ -1,8 +1,9 @@
-from fastapi import Depends,HTTPException,status
+from fastapi import Depends,HTTPException,status,Form
 from sqlmodel import Session
 from app.core.database import engine
 from typing import Annotated
 from .core.authentication import decode_role
+from .schema.images import ImageUpload
 
 
 
@@ -33,3 +34,9 @@ class RequirePermission:
         if self.required_permission != user_role:
             raise HTTPException(status_code=403,status=status.HTTP_403_FORBIDDEN,detail='Not Orthorized')
         return payload
+
+def cast_to_json(game_id : Annotated[int, Form(...)],is_main : Annotated[bool,Form(...)]) -> ImageUpload:
+    try:
+        return ImageUpload(game_id=game_id,is_main=is_main)
+    except:
+        return HTTPException(status_code=422)

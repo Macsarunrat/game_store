@@ -37,5 +37,3 @@ async def delete_image(db: Session,image_id : list[int]):
     if result.rowcount == 0:
         raise HTTPException(status_code=400,detail='ไม่พบรูปภาพนี้')
     db.commit()
-
-    return {"message":'delete success'}

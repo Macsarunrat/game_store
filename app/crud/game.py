@@ -7,8 +7,9 @@ from sqlalchemy.exc import IntegrityError
 
 async def get_all_game(db: Session):
     sql_query = text('SELECT g.id as "game_id", g.name, g.description, g.price, c.name as "catagory" ' \
-    'FROM game g JOIN game_catagory gc ON g.id = gc.game_id ' \
-    'JOIN catagory c ON gc.catagory_id = c.id ' \
+    'FROM game g ' \
+    'LEFT JOIN game_catagory gc ON g.id = gc.game_id ' \
+    'LEFT JOIN catagory c ON gc.catagory_id = c.id ' \
     'WHERE g.is_active = True ' )
     results = db.exec(sql_query).mappings().all()
     group_catagory = {}

@@ -12,5 +12,6 @@ def create_db_and_tb():
     from app.model.image import Image
     from app.model.order import Order
     from app.model.user import Role,User
+    from app.model.chat import Chat_History, Friends
     SQLModel.metadata.create_all(engine)
 

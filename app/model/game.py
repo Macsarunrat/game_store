@@ -11,7 +11,7 @@ class Game(SQLModel,table=True):
     description : str
     price : int
     catagory : list["Catagory"] = Relationship(back_populates="game", link_model=Game_catagory)
-    is_delete : bool = False
+    is_active : bool = Field(default=True,sa_column_kwargs={'server_default': "true"})
 
 
 class Catagory(SQLModel,table=True):

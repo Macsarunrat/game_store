@@ -1,15 +1,16 @@
 from pydantic import BaseModel
 
 class AccessToken(BaseModel):
-    access_key : str
-    type : str | None = None
+    access_token : str
+    token_type : str | None = None
 
 class RefreshToken(BaseModel):
-    refresh_key : str
+    refresh_token : str
 
 class TOKEN(BaseModel):
-    access_key : str
-    refresh_key : str
+    access_token : str
+    refresh_token : str
+    token_type : str
 
 
 class UserBase(BaseModel):

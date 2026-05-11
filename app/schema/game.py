@@ -6,7 +6,7 @@ class GameBase(BaseModel):
     name : str
     description : str
     price : int
-    catagories : list[str] | None = None
+    catagories : list[str | None] | None = None
 
 class GameResponse(GameBase):
     game_id : int
@@ -14,15 +14,15 @@ class GameResponse(GameBase):
 
 class CatagoryResponse(BaseModel):
     catagory_id : int
-    catagory_name : str
+    catagory_name : str 
 
 class GameCatagoryResponse(BaseModel):
     game_list : list[GameResponse]
-    catagories_list : list[CatagoryResponse]
+    catagories_list : list[CatagoryResponse] | None = None
     
 
 class GameCreate(GameBase):
-    pass
+    catagories : list[int]
 
 
 class GameDelete(BaseModel):
@@ -34,4 +34,9 @@ class GameUpdate(BaseModel):
     name : str | None = None
     description : str | None = None
     price : int | None = None
-    catagories : list[str] | None = None
+    catagories : list[int] | None = None
+
+
+
+class BuyGameRequest(BaseModel):
+    game_id : int

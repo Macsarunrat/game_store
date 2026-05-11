@@ -2,11 +2,12 @@ from fastapi import FastAPI,APIRouter,HTTPException,Request,File,UploadFile
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from app.core.database import create_db_and_tb
-from .router import user,game,order,images
+from .router import user,game,order,images,chat
 from .schema.template import ResponseTemplateConstructor
 import shutil
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,6 +23,7 @@ api_v1_router.include_router(user.router)
 api_v1_router.include_router(game.router)
 api_v1_router.include_router(order.router)
 api_v1_router.include_router(images.router)
+api_v1_router.include_router(chat.router)
 
 
 
@@ -46,3 +48,18 @@ def handle_exception(request: Request,error:HTTPException):
         )
 
 
+origins = [
+    'http://localhost:4200',
+    "http://127.0.0.1:4200",
+    "http://192.168.1.63:8000",
+    '*'
+]
+origins = ['*']
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = origins,
+    allow_credentials = False,
+    allow_methods =['*'],
+    allow_headers =['*']
+)

@@ -6,6 +6,9 @@ from fastapi import HTTPException
 
 
 async def save_fimename(db:Session,filename:str,is_main: bool,game_id: int):
+    sql_query_delete_main_image = text('DELETE FROM image WHERE game_id=:game_id AND is_main= True')
+    db.exec(sql_query_delete_main_image,params={'game_id':game_id})
+
     sql_query = text('INSERT INTO image (image,is_main,game_id) ' \
     'VALUES (:image,:is_main,:game_id) RETURNING id')
 

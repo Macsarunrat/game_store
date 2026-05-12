@@ -160,6 +160,7 @@ async def buy_game(db: Session,user_id: int, game_id : int):
             'VALUES (:user_id, :game_id) ')
         db.exec(sql_query,params={'user_id':user_id, 'game_id':game_id})
         db.commit()
+        
     except IntegrityError:
         raise HTTPException(status_code=400, detail="ไม่สามารถซื้อเกมที่มีแล้วได้")
     except Exception as e:

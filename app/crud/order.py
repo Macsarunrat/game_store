@@ -25,10 +25,12 @@ async def get_order(db:Session):
 async def update_status(db: Session,order_id : int):
     try : 
         sql_query = text(
-            'UPDATE "order" SET is_success = true WHERE id = :order_id'
+            'UPDATE "order" SET is_success = true WHERE id = :order_id ' \
+            'RETURNING user_id'
         )
-        db.exec(sql_query,params={'order_id':order_id})
+        result = db.exec(sql_query,params={'order_id':order_id}).mappings().first()
         db.commit()
+        return result
     except Exception as e:
         raise HTTPException(status_code=400,detail=f"ไม่สามารถยืนยันรายการได้ {e}")
 

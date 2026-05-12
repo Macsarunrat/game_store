@@ -1,5 +1,5 @@
 from fastapi import APIRouter,Depends, BackgroundTasks, Request
-from ..dependencies import DbSession,RequirePermission,get_redis
+from ..dependencies import DbSession,RequirePermission,get_redis,get_user
 from ..crud import order as crud_order
 from ..schema.template import ResponseTemplate, ResponseTemplateConstructor
 from ..schema.order import OrderResponse
@@ -35,10 +35,13 @@ async def confirm_order(db : DbSession,
     """
     print("Order ID")
     print(order_id)
-    await crud_order.update_status(db=db,order_id=order_id)
+    result = await crud_order.update_status(db=db,order_id=order_id)
+    user_id = result.get('user_id')
+    channel = f'{confirm_ordered}:user_id:{user_id}'
+
     message = {'order_id':order_id}
     json_data = json.dumps(message)
-    await redis_client.publish(channel=str(confirm_ordered),message=json_data)
+    await redis_client.publish(channel=str(channel),message=json_data)
     
     return ResponseTemplateConstructor(200,'OK','Confirm Successfully', None)
 
@@ -77,11 +80,13 @@ async def ordered_notification(request: Request,db: DbSession, redis_client: Ann
         await pubsub.close()
 
 @router.get('/user/notification', response_class=EventSourceResponse)
-async def order_confirm_successfully(db: DbSession, request: Request, redis_client : Annotated[redis.Redis, Depends(get_redis)]) -> AsyncIterable[ServerSentEvent]:
+async def order_confirm_successfully(db: DbSession, request: Request, redis_client : Annotated[redis.Redis, Depends(get_redis)], token : Annotated[str, Depends(get_user)]) -> AsyncIterable[ServerSentEvent]:
 
     pubsub = redis_client.pubsub()
 
-    await pubsub.subscribe(confirm_ordered)
+    user_id = token.get('user_id')
+    channel = f'{confirm_ordered}:user_id:{user_id}'
+    await pubsub.subscribe(channel)
 
     try:
         while True:

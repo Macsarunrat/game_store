@@ -31,3 +31,26 @@ async def update_status(db: Session,order_id : int):
         db.commit()
     except Exception as e:
         raise HTTPException(status_code=400,detail=f"ไม่สามารถยืนยันรายการได้ {e}")
+
+
+async def get_new_order(db: Session, user_id:int ,game_id: int):
+    sql_query = text(
+        'SELECT o.date,u.username,g.name, g.price FROM "order" o ' \
+        'JOIN "user" u ON u.id= o.user_id ' \
+        'JOIN game g ON g.id = o.game_id ' \
+        'WHERE o.user_id = :user_id AND o.game_id=:game_id ')
+    
+    result = db.exec(sql_query,params={'user_id':user_id,'game_id':game_id}).mappings().first()
+
+    return result
+
+async def get_confirm_order(db:Session, order_id: int):
+    sql_query = text(
+        'SELECT g.name,o.user_id FROM "order" o ' \
+        'JOIN game g ON g.id= o.game_id ' \
+        'WHERE o.id = :order_id'
+    )
+    result = db.exec(sql_query,params={'order_id':order_id}).mappings().first()
+    if result is None:
+        return None
+    return result

@@ -5,8 +5,9 @@ from ..dependencies import DbSession,RequirePermission,get_user, get_redis
 from ..crud import game as crud_game
 from typing import Annotated
 import json
-
+from .order import ordered_notification
 import redis.asyncio as redis
+from app.core.channel import new_order_channel
 
 
 router = APIRouter(
@@ -102,13 +103,25 @@ async def get_catagory(db: DbSession, current_user : Annotated[str,Depends(Requi
 
 
 @router.post('/buy',response_model=ResponseTemplate[str])
-async def buy_game(db: DbSession, body : BuyGameRequest, current_user : Annotated[str, Depends(RequirePermission(['customer']))],user_data : Annotated[str,Depends(get_user)]):
+async def buy_game(db: DbSession, 
+                   body : BuyGameRequest, 
+                   current_user : Annotated[str, Depends(RequirePermission(['customer']))], 
+                   user_data : Annotated[str,Depends(get_user)],
+                   redis_client : Annotated[redis.Redis,Depends(get_redis)]
+                   
+                   ):
     print("USER DATA")
     print(user_data)
     user_id = user_data['user_id']
     game_id = body.game_id
 
     await crud_game.buy_game(db,user_id,game_id)
+
+
+    message = {'user_id':int(user_id),'game_id': int(game_id)}
+    json_data = json.dumps(message,ensure_ascii=False)
+
+    await redis_client.publish(channel=new_order_channel,message=json_data)
 
     return ResponseTemplateConstructor(200,'OK','ทำรายการสั่งซื้อสำเร็จ',None) 
 

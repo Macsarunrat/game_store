@@ -8,11 +8,36 @@ import shutil
 from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+import redis.asyncio as redis
+import os
+
+
+redis_client : redis.Redis | None = None
+
+redis_url = os.getenv("REDIS_URL","redis://localhost:6379/0")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    global redis_client
+
+    redis_client = redis.from_url(
+        url=redis_url,
+        decode_responses = True
+    )
+
+    app.state.redis = redis_client
+
+    try:
+        await redis_client.ping()
+    except redis.ConnectionError:
+        print('Failed to connect to redis')
+
+
+
     create_db_and_tb()
     yield
+    if hasattr(app.state, "redis"):
+        await app.state.redis.aclose()
 
 
 

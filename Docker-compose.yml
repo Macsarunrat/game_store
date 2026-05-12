@@ -7,4 +7,14 @@ services:
       - .:/app
       - ./upload:/app/upload
     env_file:
-      - app/.env
+      - .env
+    extra_hosts:
+      - "localhost:host-gateway"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+

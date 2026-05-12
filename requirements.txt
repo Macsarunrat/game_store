@@ -11,6 +11,7 @@ email-validator==2.3.0
 fastapi==0.136.0
 fastapi-cli==0.0.24
 fastapi-cloud-cli==0.17.0
+fastapi-limiter==0.2.0
 fastar==0.11.0
 greenlet==3.4.0
 h11==0.16.0
@@ -30,9 +31,11 @@ pydantic-settings==2.14.0
 pydantic_core==2.46.3
 Pygments==2.20.0
 PyJWT==2.12.1
+pyrate-limiter==4.1.0
 python-dotenv==1.2.2
 python-multipart==0.0.26
 PyYAML==6.0.3
+redis==7.4.0
 rich==15.0.0
 rich-toolkit==0.19.7
 rignore==0.7.6

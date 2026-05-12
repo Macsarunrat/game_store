@@ -1,10 +1,10 @@
-from fastapi import Depends,HTTPException,status,Form
+from fastapi import Depends,HTTPException,status,Form, Request
 from sqlmodel import Session
 from app.core.database import engine
 from typing import Annotated
 from .core.authentication import decode_role,oauth2_schema , decode_jwt
 from .schema.images import ImageUpload
-
+import redis.asyncio as redis
 
 
 
@@ -54,3 +54,9 @@ def cast_to_json(game_id : Annotated[int, Form(...)],is_main : Annotated[bool,Fo
         return ImageUpload(game_id=game_id,is_main=is_main)
     except:
         return HTTPException(status_code=422)
+    
+
+async def get_redis(request : Request) -> redis.Redis:
+    if not hasattr(request.app.state, "redis") or request.app.state.redis is None :
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="redis is not working")
+    return request.app.state.redis

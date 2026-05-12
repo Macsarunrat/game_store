@@ -1,9 +1,12 @@
 from fastapi import APIRouter,Depends,HTTPException,status, Query
 from ..schema.game import GameResponse,GameCreate,GameCatagoryResponse,GameDelete,GameUpdate,CatagoryResponse,BuyGameRequest
 from ..schema.template import ResponseTemplate,ResponseTemplateConstructor
-from ..dependencies import DbSession,RequirePermission,get_user
+from ..dependencies import DbSession,RequirePermission,get_user, get_redis
 from ..crud import game as crud_game
 from typing import Annotated
+import json
+
+import redis.asyncio as redis
 
 
 router = APIRouter(
@@ -11,11 +14,28 @@ router = APIRouter(
     tags=['game']
 )
 
-
-
 @router.get('/',response_model=ResponseTemplate[list[GameResponse]])
-async def get_all_game(db: DbSession,current_user : Annotated[str,Depends(RequirePermission(required_permission=['admin','customer','owner']))]):
+async def get_all_game(
+    db: DbSession,
+    current_user : Annotated[str,Depends(RequirePermission(required_permission=['admin','customer','owner']))],
+    cache : Annotated[redis.Redis,Depends(get_redis)]
+    ):
+
+    cache_key = "game:all:"
+
+    cache_data = await cache.get(cache_key)
+
+    if cache_data:
+        print('=' *50)
+        print("Load from redis")
+        print('=' *50)
+        data = json.loads(cache_data)
+        return ResponseTemplateConstructor(200,'OK','get successfully', data)
+
+    
     results =  await crud_game.get_all_game(db)
+
+    await cache.set(cache_key,json.dumps(results), ex=60)
 
     return ResponseTemplateConstructor(200,'OK','get successfully',results)
 
@@ -27,7 +47,10 @@ async def get_all_game(db: DbSession):
 
 
 @router.post('/create-game',response_model=ResponseTemplate[dict])
-async def create_game(db:DbSession, body: GameCreate,current_user : Annotated[str,Depends(RequirePermission(['owner']))]):
+async def create_game(
+    db:DbSession, body: GameCreate,
+    current_user : Annotated[str,Depends(RequirePermission(['owner']))],
+    cache : Annotated[redis.Redis,Depends(get_redis)]):
     game_name = body.name
     description = body.description
     price = body.price
@@ -36,15 +59,20 @@ async def create_game(db:DbSession, body: GameCreate,current_user : Annotated[st
         db=db,game_name=game_name,description=description,price=price,catagory=catagory)
     
     response = {'ไอดีที่เพิ่ม': results_id}
+    await cache.delete("game:all:")
     return ResponseTemplateConstructor(200,'OK','get successfully',response)
 
 
 @router.delete('/delete', response_model=ResponseTemplate[str])
-async def delete_game(db: DbSession, game_id : Annotated[list[int],Query()],current_user : Annotated[str,Depends(RequirePermission(['owner']))]):
+async def delete_game(
+    db: DbSession, game_id : Annotated[list[int],Query()], 
+    current_user : Annotated[str,Depends(RequirePermission(['owner']))],
+    cache : Annotated[redis.Redis, Depends(get_redis)]):
     game_id = game_id
     if not game_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail='กรุณาใส่ไอดีเกมที่ต้องการจะลบ')
     await crud_game.delete_game(db=db,game_id=game_id)
+    await cache.delete("game:all:")
     return ResponseTemplateConstructor('200','OK','Delete Successfully',None)
 
 @router.patch('/update-info',response_model=ResponseTemplate[str])

@@ -1,11 +1,12 @@
 from fastapi import File, UploadFile,APIRouter,Depends, Query
-from ..dependencies import DbSession,cast_to_json, RequirePermission
+from ..dependencies import DbSession,cast_to_json, RequirePermission,get_redis
 import shutil
 from pathlib import Path
 from  ..schema.images import ImageUpload,ImageDelete
 from ..crud import images as crud_image
 from typing import Annotated
 import asyncio
+import redis.asyncio as redis
 
 from ..schema.template import ResponseTemplate, ResponseTemplateConstructor
 
@@ -25,7 +26,9 @@ def save_and_upload(file_path, file):
 
 @router.post('/upload-image')
 async def upload_image(db: DbSession,body : Annotated[ImageUpload,Depends(cast_to_json)],file: Annotated[UploadFile,File(...)],
-                       current_user : Annotated[str,Depends(RequirePermission(['admin','owner']))]):
+                       current_user : Annotated[str,Depends(RequirePermission(['admin','owner']))],
+                       cache : Annotated[redis.Redis, Depends(get_redis)]
+                       ):
     is_main = body.is_main
     game_id = body.game_id
     file_path = UPLOADIMAGE_DIR / file.filename
@@ -33,6 +36,7 @@ async def upload_image(db: DbSession,body : Annotated[ImageUpload,Depends(cast_t
     await asyncio.to_thread(save_and_upload,file_path, file.file)
 
     await crud_image.save_fimename(db=db,filename=str(file_path.as_posix()),is_main=is_main,game_id=game_id)
+    await cache.delete("game:all:")
 
     return ResponseTemplateConstructor(200,'OK','uploadded successfully',detail=None)
 
@@ -49,6 +53,7 @@ async def get_image(db: DbSession):
     }
 
 @router.delete('/delete-image-list' , response_model= ResponseTemplate[str])
-async def delete_image_list(db: DbSession, image_id : Annotated[list[int], Query()],current_user : Annotated[str,Depends(RequirePermission(['admin','owner']))]):
+async def delete_image_list(db: DbSession, image_id : Annotated[list[int], Query()],current_user : Annotated[str,Depends(RequirePermission(['admin','owner']))], cache : Annotated[redis.Redis, Depends(get_redis)]):
     await crud_image.delete_image(db=db,image_id=image_id)
+    await cache.delete("game:all:")
     return ResponseTemplateConstructor('200','OK','delete successfully',None)

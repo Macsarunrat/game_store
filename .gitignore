@@ -2,6 +2,6 @@
 
 upload/
 
-.env/
+.env
 
 **__pycache__/

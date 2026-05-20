@@ -14,10 +14,19 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v5
 
+    - name: Create Mock .env File for Testing
+      run: |
+        echo "POSTGRES_USER=testuser" >> .env
+        echo "POSTGRES_PASSWORD=testpassword" >> .env
+        echo "POSTGRES_DB=testdb" >> .env
+        echo "POSTGRES_URL=postgresql+asyncpg://testuser:testpassword@db:5432/testdb" >> .env
+
     - name: Build and start Docker Service
       run: |
         docker compose up -d --build
         sleep 15
+
+    
 
     - name: Check Docker Containers Status
       run: docker compose ps

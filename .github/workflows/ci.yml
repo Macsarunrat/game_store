@@ -16,7 +16,7 @@ jobs:
 
     - name: Build and start Docker Service
       run: |
-        docker compose up -d --Build
+        docker compose up -d --build
         sleep 15
 
     - name: Check Docker Containers Status

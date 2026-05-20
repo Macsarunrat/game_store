@@ -20,6 +20,15 @@ jobs:
         echo "POSTGRES_PASSWORD=testpassword" >> .env
         echo "POSTGRES_DB=testdb" >> .env
         echo "POSTGRES_URL=postgresql+asyncpg://testuser:testpassword@db:5432/testdb" >> .env
+        echo "ALGORITHM=HS256" >> .env 
+        echo "ACCESS_TOKEN_EXPIRE_MINUTES=30" >> .env
+        echo "SECRET_KEY=123456789" >> .env
+
+        echo "REDIS_URL=redis://redis:6379/0" >> .env
+
+        echo "MAIL_USERNAME=test" >> .env
+        echo "MAIL_PASSWORD=12346" >> .env
+        echo "MAIL_FROM_NAME=test" >> .env
 
     - name: Build and start Docker Service
       run: |

@@ -20,10 +20,11 @@ class User(SQLModel,table=True):
     first_name : str
     last_name :str
     role_id : int = Field(foreign_key="role.id")
+    email : str | None = None
 
 class User_Refresh_Token(SQLModel,table=True):
     id : int | None = Field(primary_key=True)
     user_id : int = Field(foreign_key='user.id')
     jti : str
-    is_active : bool = Field(default=True, sa_column_kwargs={"server_defalut":"true"})
-    create_at : datetime = Field(default_factory=datetime.now(timezone.utc),sa_column_kwargs={'server_default': text('CURRENT_TIMESTAMP')})
+    is_active : bool = Field(default=True, sa_column_kwargs={"server_default":"true"})
+    create_at : datetime = Field(default_factory=datetime.now(timezone.utc),sa_column_kwargs={"server_default": text('CURRENT_TIMESTAMP')})

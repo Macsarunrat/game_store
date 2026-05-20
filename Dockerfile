@@ -1,4 +1,4 @@
-FROM python:3.13-slim AS base
+FROM python:3.12-slim AS base
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
 
 #final stage
-FROM python:3.13-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 

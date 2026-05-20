@@ -2,7 +2,7 @@ from fastapi import FastAPI,APIRouter,HTTPException,Request,File,UploadFile
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from app.core.database import create_db_and_tb
-from .router import user,game,order,images,chat
+from app.router.v1.api import api_v1_router
 from .schema.template import ResponseTemplateConstructor
 import shutil
 from pathlib import Path
@@ -10,6 +10,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import redis.asyncio as redis
 import os
+
+from app.utils import stripe
 
 
 redis_client : redis.Redis | None = None
@@ -34,7 +36,7 @@ async def lifespan(app: FastAPI):
 
 
 
-    create_db_and_tb()
+    await create_db_and_tb()
     yield
     if hasattr(app.state, "redis"):
         await app.state.redis.aclose()
@@ -43,16 +45,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan,title="Game Shop",version='1.0.0')
 
-api_v1_router = APIRouter(prefix='/api/v1')
-api_v1_router.include_router(user.router)
-api_v1_router.include_router(game.router)
-api_v1_router.include_router(order.router)
-api_v1_router.include_router(images.router)
-api_v1_router.include_router(chat.router)
-
-
 
 app.include_router(api_v1_router)
+app.include_router(stripe.router)
 
 app.mount('/static',StaticFiles(directory="upload"),'upload')
 

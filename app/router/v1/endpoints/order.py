@@ -1,8 +1,8 @@
 from fastapi import APIRouter,Depends, BackgroundTasks, Request
-from ..dependencies import DbSession,RequirePermission,get_redis,get_user
-from ..crud import order as crud_order
-from ..schema.template import ResponseTemplate, ResponseTemplateConstructor
-from ..schema.order import OrderResponse
+from ....dependencies import DbSession,RequirePermission,get_redis,get_user
+from ....crud import order as crud_order
+from ....schema.template import ResponseTemplate, ResponseTemplateConstructor
+from ....schema.order import OrderResponse
 from typing import Annotated
 from fastapi.sse import ServerSentEvent, EventSourceResponse
 from collections.abc import AsyncIterable
@@ -10,7 +10,9 @@ from fastapi.encoders import jsonable_encoder
 import redis.asyncio as redis
 import asyncio
 import json
-from app.core.channel import new_order_channel, confirm_ordered
+from app.utils.channel import new_order_channel, confirm_ordered
+from app.schema.email import SendEmail
+from app.utils.email import send_email
 
 router = APIRouter(
     prefix='/order',
@@ -28,7 +30,8 @@ async def get_order(db : DbSession,current_user : Annotated[str,Depends(RequireP
 async def confirm_order(db : DbSession, 
                         current_user : Annotated[str, Depends(RequirePermission(['owner','admin']))], 
                         order_id : int,
-                        redis_client : Annotated[redis.Redis, Depends(get_redis)]
+                        redis_client : Annotated[redis.Redis, Depends(get_redis)],
+                        background_tasks : BackgroundTasks
                         ):
     """
     สำหรับยืนยันออเดอร์ที่เข้ามา
@@ -37,20 +40,46 @@ async def confirm_order(db : DbSession,
     print(order_id)
     result = await crud_order.update_status(db=db,order_id=order_id)
     user_id = result.get('user_id')
+    
+    #for alert to customer
     channel = f'{confirm_ordered}:user_id:{user_id}'
-
-    message = {'order_id':order_id}
+    message = {'order_id':order_id,'type': 'confirm_order'}
     json_data = json.dumps(message)
     await redis_client.publish(channel=str(channel),message=json_data)
+    #for realtime order status
+    channel = new_order_channel
+    await redis_client.publish(channel=channel,message=json_data)
+
+    #for send email 
+    email_detail = await crud_order.get_order_by_id(db,order_id=order_id)
+    print(email_detail)
+    data = {
+        "email" : "tdtayranoo@gmail.com",
+        "customer_name" : email_detail.get('first_name'),
+        "order_id" : email_detail.get('id'),
+        "game" : email_detail.get('name'),
+        "price" : email_detail.get('price')
+
+    }
+    email = SendEmail(**data)
+    await send_email(email,background_tasks)
+    
+
+
+
+    
     
     return ResponseTemplateConstructor(200,'OK','Confirm Successfully', None)
 
     
 @router.get('/admin_owner/notification', response_class = EventSourceResponse)
-async def ordered_notification(request: Request,db: DbSession, redis_client: Annotated[redis.Redis, Depends(get_redis)]) -> AsyncIterable[ServerSentEvent]:
+async def ordered_notification(request: Request,db: DbSession, redis_client: Annotated[redis.Redis, Depends(get_redis)], current_user : Annotated[str,Depends(RequirePermission(['admin','owner']))]) -> AsyncIterable[ServerSentEvent]:
     
     pubsub = redis_client.pubsub()
     await pubsub.subscribe(new_order_channel)
+    yield ServerSentEvent(event='start_connection',data='ping')
+    
+    
 
     try:
         while True:
@@ -59,19 +88,19 @@ async def ordered_notification(request: Request,db: DbSession, redis_client: Ann
 
             message = await pubsub.get_message(ignore_subscribe_messages=False, timeout=0.1)
             
-            print('=' * 50)
-            print('ข้อความที่รับมา')
-            print(message)
-            print('=' * 50) 
 
             if message and message['type'] == "message" :
                 data = json.loads(message['data'])
+                if data['type'] == 'confirm_order':
+                    message = {'order_id': data['order_id'], 'is_success': True}
+                    yield ServerSentEvent(data=message, retry=5000, event=f'confirm_order:order_id:')
                 result = await crud_order.get_new_order(db=db,user_id=data['user_id'],game_id=data['game_id'])
                 customer = result['username']
                 game_name = result['name']
                 price = result['price']
                 time = result['date']
-                message = {'customer':f'คำสั่งซื้อจาก {customer}','game': f'เกม {game_name}','price':f'ยอด {price}','time':f'เวลา{time}'}
+
+                message = {'customer':customer,'game': game_name,'price':price,'time':time}
                 yield ServerSentEvent(data=message,retry=5000,event='new_order')
 
             
@@ -79,8 +108,11 @@ async def ordered_notification(request: Request,db: DbSession, redis_client: Ann
         await pubsub.unsubscribe(new_order_channel)
         await pubsub.close()
 
-@router.get('/user/notification', response_class=EventSourceResponse)
+@router.get('/customer/notification', response_class=EventSourceResponse)
 async def order_confirm_successfully(db: DbSession, request: Request, redis_client : Annotated[redis.Redis, Depends(get_redis)], token : Annotated[str, Depends(get_user)]) -> AsyncIterable[ServerSentEvent]:
+    '''
+    for user subscript
+    '''
 
     pubsub = redis_client.pubsub()
 
@@ -88,14 +120,13 @@ async def order_confirm_successfully(db: DbSession, request: Request, redis_clie
     channel = f'{confirm_ordered}:user_id:{user_id}'
     await pubsub.subscribe(channel)
 
+    yield ServerSentEvent(event='start_connection',data='ping')
+
     try:
         while True:
 
             message = await pubsub.get_message(ignore_subscribe_messages=False,timeout=0.1)
-            print('=' *50)
-            print('Order Id from sub')
-            print(message)
-            print('=' *50)
+    
             if message and message['type'] == 'message':
                 data = json.loads(message['data'])
                 order_id = data['order_id']
@@ -113,11 +144,11 @@ async def order_confirm_successfully(db: DbSession, request: Request, redis_clie
 
                 message = {'game':result['name']}
                 user_id=result['user_id']
-                yield ServerSentEvent(data=message, retry=5000,event=f'confirm_order:user_id:{user_id}')
+                yield ServerSentEvent(data=message, retry=5000,event=f'confirm_order:user_id:')
 
                  
     finally:
-        await pubsub.unsubscribe(confirm_ordered)
+        await pubsub.unsubscribe(channel)
         await pubsub.close()
 
 

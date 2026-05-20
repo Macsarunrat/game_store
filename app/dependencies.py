@@ -5,25 +5,21 @@ from typing import Annotated
 from .core.authentication import decode_role,oauth2_schema , decode_jwt
 from .schema.images import ImageUpload
 import redis.asyncio as redis
+from sqlmodel.ext.asyncio.session import AsyncSession
+from app.core.database import get_database_session
 
 
 
-
-
-async def get_db():
-    with Session(engine) as session :
-        yield session
-
-DbSession = Annotated[Session,Depends(get_db)]
+DbSession = Annotated[Session,Depends(get_database_session)]
 
 
 
-def get_current_user_token(access_key : Annotated[str,Depends(oauth2_schema)]):
-    print(f"DEBUG: RECEIVED TOKEN -> '{access_key}'")
-    role_name = decode_role(access_key) 
-    if role_name is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid token")
-    return role_name
+# def get_current_user_token(access_key : Annotated[str,Depends(oauth2_schema)]):
+#     print(f"DEBUG: RECEIVED TOKEN -> '{access_key}'")
+#     role_name = decode_role(access_key) 
+#     if role_name is None:
+#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid token")
+#     return role_name
 
 def get_user(access_key : Annotated[str, Depends(oauth2_schema)]):
     print("ACCESS KEY")
@@ -40,8 +36,8 @@ class RequirePermission:
     def __init__(self, required_permission: list):
         self.required_permission = required_permission
 
-    def __call__(self, payload = Depends(get_current_user_token)):
-        user_role = payload
+    def __call__(self, payload = Depends(get_user)):
+        user_role = payload.get('role_name')
 
         print(f"\n====================================\n {user_role} \n==========================\n")
 

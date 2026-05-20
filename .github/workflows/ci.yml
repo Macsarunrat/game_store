@@ -1,0 +1,29 @@
+name: FastAPI
+
+on:
+  push: 
+    branches: ['main']
+  pull_request: 
+    branches: ['main']
+
+jobs:
+  test-in-docker:
+    runs_on : ubantu-lasted
+
+    steps:
+    
+    - name : Checkout code
+    - uses : actions/checkout@v4
+
+
+    - name: Build and start Docker Service
+    run: |
+      docker compose up -d --Build
+
+      sleep 10
+
+    - name: Run Pytest
+    run: docker compose exec -T backend pytese
+
+
+

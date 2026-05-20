@@ -1,13 +1,17 @@
-from fastapi import APIRouter,Depends,HTTPException,status, Query
-from ..schema.game import GameResponse,GameCreate,GameCatagoryResponse,GameDelete,GameUpdate,CatagoryResponse,BuyGameRequest
-from ..schema.template import ResponseTemplate,ResponseTemplateConstructor
-from ..dependencies import DbSession,RequirePermission,get_user, get_redis
-from ..crud import game as crud_game
+from fastapi import APIRouter,Depends,HTTPException,status, Query, Request, BackgroundTasks
+from ....schema.game import GameResponse,GameCreate,GameCatagoryResponse,GameDelete,GameUpdate,CatagoryResponse,BuyGameRequest
+from ....schema.template import ResponseTemplate,ResponseTemplateConstructor
+from ....dependencies import DbSession,RequirePermission,get_user, get_redis
+from ....crud import game as crud_game
 from typing import Annotated
 import json
 from .order import ordered_notification
 import redis.asyncio as redis
-from app.core.channel import new_order_channel
+from app.utils.channel import new_order_channel
+from ....crud.logs import save_log
+from ....model.logs import Game_Logs
+from ....crud.logs import game_log
+
 
 
 router = APIRouter(
@@ -36,7 +40,7 @@ async def get_all_game(
     
     results =  await crud_game.get_all_game(db)
 
-    await cache.set(cache_key,json.dumps(results), ex=60)
+    await cache.set(cache_key,json.dumps(results), ex=1000)
 
     return ResponseTemplateConstructor(200,'OK','get successfully',results)
 
@@ -51,16 +55,21 @@ async def get_all_game(db: DbSession):
 async def create_game(
     db:DbSession, body: GameCreate,
     current_user : Annotated[str,Depends(RequirePermission(['owner']))],
-    cache : Annotated[redis.Redis,Depends(get_redis)]):
+    cache : Annotated[redis.Redis,Depends(get_redis)],
+    request : Request,
+    background_task : BackgroundTasks
+    ):
     game_name = body.name
     description = body.description
     price = body.price
     catagory = body.catagories
-    results_id = await crud_game.create_game(
-        db=db,game_name=game_name,description=description,price=price,catagory=catagory)
+    game_id = await crud_game.create_game(db=db,game_name=game_name,description=description,price=price,catagory=catagory)
     
-    response = {'ไอดีที่เพิ่ม': results_id}
+    response = {'ไอดีที่เพิ่ม': game_id}
     await cache.delete("game:all:")
+
+    user_id = current_user.get('user_id')
+    background_task.add_task(game_log,user_id,game_id,"CREATE",request.client.host,None)
     return ResponseTemplateConstructor(200,'OK','get successfully',response)
 
 
@@ -68,22 +77,36 @@ async def create_game(
 async def delete_game(
     db: DbSession, game_id : Annotated[list[int],Query()], 
     current_user : Annotated[str,Depends(RequirePermission(['owner']))],
-    cache : Annotated[redis.Redis, Depends(get_redis)]):
+    cache : Annotated[redis.Redis, Depends(get_redis)],
+    request : Request,
+    background_task : BackgroundTasks
+    ):
     game_id = game_id
     if not game_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail='กรุณาใส่ไอดีเกมที่ต้องการจะลบ')
     await crud_game.delete_game(db=db,game_id=game_id)
     await cache.delete("game:all:")
+
+    user_id = current_user.get('user_id')
+    background_task.add_task(game_log,user_id,game_id,"DELETE",request.client.host,None)
     return ResponseTemplateConstructor('200','OK','Delete Successfully',None)
 
 @router.patch('/update-info',response_model=ResponseTemplate[str])
-async def update_game(db:DbSession, body: GameUpdate, current_user : Annotated[str,Depends(RequirePermission(['admin','owner']))]):
+async def update_game(
+    db:DbSession, 
+    body: GameUpdate, 
+    current_user : Annotated[str,Depends(RequirePermission(['admin','owner']))],
+    request : Request,
+    background_task : BackgroundTasks,
+    cache : Annotated[redis.Redis,Depends(get_redis)]
+    ):
     game_name = body.name
     description = body.description
     price = body.price
     catagory = body.catagories
     game_id = body.game_id
 
+    old_data = await crud_game.get_game_by_id(db=db,game_id=game_id)
     await crud_game.update_game(
         game_name=game_name,
         description=description,
@@ -91,6 +114,19 @@ async def update_game(db:DbSession, body: GameUpdate, current_user : Annotated[s
         catagory=catagory,
         game_id=game_id,
         db=db)
+    
+    new_data = body.model_dump(exclude_unset=True)
+    #new_data = {'name': game_name,'description': description,'price':price} 
+    print("="*100)
+    print('OLD data')
+    print(game_id)
+
+    print(old_data)
+    print('='*100)
+    user_id = current_user.get('user_id')
+    payload = await check_diff(new_data,old_data)
+    background_task.add_task(game_log,user_id,game_id,"UPDATE", request.client.host,payload)
+    await cache.delete("game:all:")
 
     return ResponseTemplateConstructor('200','OK','Update Successfully',None)
 
@@ -118,7 +154,7 @@ async def buy_game(db: DbSession,
     await crud_game.buy_game(db,user_id,game_id)
 
 
-    message = {'user_id':int(user_id),'game_id': int(game_id)}
+    message = {'user_id':int(user_id),'game_id': int(game_id),'type':'new_order'}
     json_data = json.dumps(message,ensure_ascii=False)
 
     await redis_client.publish(channel=new_order_channel,message=json_data)
@@ -127,3 +163,19 @@ async def buy_game(db: DbSession,
 
 # @router.post('/customer_game', response_model=ResponseTemplate[str])
 # async def customer_game(db: DbSession, user_id : int):
+
+
+
+
+async def check_diff(new_data : dict, old_data: dict):
+    try:
+        intersec_keys = new_data.keys() & old_data.keys()
+        data_diff = {k : {'new_data':new_data[k],'old_data':old_data[k]} for k in intersec_keys if new_data[k] != old_data[k]}
+        print('='*50)
+        print('DATA DIFF')
+        print(data_diff)
+        print('='*50)
+        return data_diff
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f'Error check diff {e}')
+    

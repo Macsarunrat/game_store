@@ -1,32 +1,51 @@
 from sqlmodel import Session, text
 from fastapi import HTTPException
+from datetime import datetime
+from sqlalchemy.exc import IntegrityError
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 
-async def get_all_user(db: Session, name : str | None, user_id : int):
+async def get_all_user(db: AsyncSession, name : str | None, user_id : int):
+
+    lasted_message_subquery = """
+            LEFT JOIN (
+            SELECT friendship_id ,message, created_at 
+            FROM (
+                SELECT friendship_id , message , created_at, 
+                    ROW_NUMBER() OVER (PARTITION BY friendship_id ORDER BY created_at DESC) as rn
+                FROM chat_history
+            ) sub
+            WHERE sub.rn = 1
+            ) ch ON ch.friendship_id = f.id
+
+    """
+
+    base_sql = f"""
+            SELECT u.id,u.first_name, u.last_name, f.status, ch.message AS lasted_message, ch.created_at AS time
+            FROM "user" u 
+            LEFT JOIN friends f ON 
+            (f.friend_id = u.id AND f.user_id = :user_id ) OR 
+            (f.user_id = u.id AND f.friend_id = :user_id) 
+            {lasted_message_subquery}
+
+    """
 
     if not name:
-        sql_query = text(
-            'SELECT u.id,u.first_name, u.last_name, f.status FROM "user" u ' \
-            'LEFT JOIN friends f ON f.friend_id = u.id AND f.user_id = :user_id ' \
-            'WHERE u.id != :user_id ' \
-            'LIMIT 20 '
-            )
-        results =db.exec(sql_query,params={'user_id':user_id}).mappings().all()
+        sql_query = text(base_sql + " WHERE u.id != :user_id LIMIT 50")
+        params ={'user_id':user_id}
     else :
-        sql_query = text(
-            'SELECT u.id,u.first_name, u.last_name FROM "user" u ' \
-            'LEFT JOIN friends f ON f.friend_id = u.id AND f.user_id = :user_id ' \
-            'WHERE u.first_name LIKE :name OR u.last_name LIKE :name AND u.id != :user_id ' \
-            'LIMIT 20'
-            )
-        results = db.exec(sql_query,params={'name': f'%{name}%', 'user_id':user_id}).mappings().all()
+        sql_query = text(base_sql + " WHERE (u.first_name LIKE :name OR u.last_name LIKE :name) AND u.id != :user_id LIMIT 50")
+        params = {'name': f'%{name}%', 'user_id':user_id}
+    
+    results = (await db.exec(sql_query,params=params)).mappings().all()
+    print(results)
 
     return results
 
     
 
 
-async def get_friends_of_user(db: Session, user_id: int):
+async def get_friends_of_user(db: AsyncSession, user_id: int):
     """
     ยังไม่ต้องใช้
     """
@@ -35,34 +54,37 @@ async def get_friends_of_user(db: Session, user_id: int):
     'JOIN friends f ON f.friend_id = u.id ' \
     'WHERE f.user_id = :user_id ')
 
-    results = db.exec(sql_query,params={'user_id': user_id}).mappings().all()
+    results = await db.exec(sql_query,params={'user_id': user_id}).mappings().all()
     return results
 
 
-async def add_friend(db : Session , user_id: int , friend_id : int):
-
-    requester_id = user_id
-
-
-    smaller_id, larger_id = (user_id, friend_id) if user_id < friend_id else (friend_id,user_id)
-
-    sql_query = text(' ' \
-    'INSERT INTO FRIENDS (user_id,friend_id, requester_id,status) ' \
-    'VALUES (:user_id,:friend_id,:requester_id,:status) ')
-    db.exec(sql_query, params={'user_id':smaller_id,'friend_id': larger_id,'requester_id':requester_id, 'status': 'pending'})
-    db.commit()
+async def add_friend(db : AsyncSession , user_id: int , friend_id : int):
+    try:
+        requester_id = user_id
 
 
-async def save_chat(db: Session, user_id : int, friendship_id : int, message : str):
+        smaller_id, larger_id = (user_id, friend_id) if user_id < friend_id else (friend_id,user_id)
+
+        sql_query = text(' ' \
+        'INSERT INTO FRIENDS (user_id,friend_id, requester_id,status) ' \
+        'VALUES (:user_id,:friend_id,:requester_id,:status) ')
+        await db.exec(sql_query, params={'user_id':smaller_id,'friend_id': larger_id,'requester_id':requester_id, 'status': 'pending'})
+        await db.commit()
+    except IntegrityError :
+        raise HTTPException(status_code=400, detail='ไม่สามารถเพิ่มเพื่อนที่มีอยู่แล้วได้')
+
+
+
+async def save_chat(db: AsyncSession, user_id : int, friendship_id : int, message : str,created_at : datetime):
     sql_query = text(
-        ' INSERT INTO chat_history (sender_id, friendship_id, message) ' \
-        'VALUES (:sender_id,:friendship_id,:message) '
+        ' INSERT INTO chat_history (sender_id, friendship_id, message,created_at) ' \
+        'VALUES (:sender_id,:friendship_id,:message,:created_at) '
     )
-    db.exec(sql_query,params={'sender_id':user_id,'friendship_id': friendship_id,'message':message})
-    db.commit()
+    await db.exec(sql_query,params={'sender_id':user_id,'friendship_id': friendship_id,'message':message,'created_at': created_at})
+    await db.commit()
 
 
-async def is_friend(db: Session, user_id: int , friend_id: int):
+async def is_friend(db: AsyncSession, user_id: int , friend_id: int):
 
     
 
@@ -72,7 +94,7 @@ async def is_friend(db: Session, user_id: int , friend_id: int):
         'SELECT f.id FROM friends f ' \
         'WHERE f.user_id = :user_id AND f.friend_id = :friend_id'
     )
-    results = db.exec(sql_query,params={'user_id':smaller_id,'friend_id':larger_id}).mappings().first()
+    results = (await db.exec(sql_query,params={'user_id':smaller_id,'friend_id':larger_id})).mappings().first()
     print("ผลลัพธ์จากการค้นหาเพื่อน")
     print(results)
     if results == None:
@@ -80,11 +102,24 @@ async def is_friend(db: Session, user_id: int , friend_id: int):
     return results
 
 
-async def get_history(db: Session, friendship_id : int):
+async def get_history(db: AsyncSession, friendship_id : int):
     sql_query = text(
         'SELECT * FROM chat_history ch ' \
         'WHERE ch.friendship_id = :friendship_id ' \
         'ORDER BY ch.created_at ASC'
     )
-    results = db.exec(sql_query,params={'friendship_id': friendship_id}).mappings().all()
+    results = (await db.exec(sql_query,params={'friendship_id': friendship_id})).mappings().all()
     return results
+
+
+async def confirm_friend(db: AsyncSession,user_id: int, friend_id : int):
+
+    lower_id = min(user_id,friend_id)
+    higher_id = max(user_id,friend_id)
+
+    sql_query = text(
+        "UPDATE friends set status = 'friend' " \
+        "WHERE user_id = :user_id AND friend_id = :friend_id"
+    )
+    await db.exec(sql_query,params={'user_id':lower_id,'friend_id':higher_id})
+    await db.commit()

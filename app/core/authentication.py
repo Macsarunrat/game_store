@@ -6,7 +6,7 @@ from jwt import PyJWTError
 from fastapi.security import OAuth2PasswordBearer
 from typing import Annotated
 from fastapi import HTTPException
-
+from pwdlib import PasswordHash
 
 load_dotenv()
 
@@ -15,6 +15,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 ALGORITHM = os.getenv("ALGORITHM")
 
 oauth2_schema = OAuth2PasswordBearer(tokenUrl='api/v1/user/login')
+
+passwordhash = PasswordHash.recommended()
 
 def create_access_token(data:dict, expire_time: timedelta | None = None):
     to_encode = data.copy()
@@ -52,7 +54,7 @@ def decode_jwt(token:str):
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail='Token ไม่ถูกต้อง')
 
-def decode_role(access_key :str):
+async def decode_role(access_key :str):
     try:
         payload = jwt.decode(access_key,SECRET_KEY,algorithms=ALGORITHM)
         user = payload.get('sub')
@@ -74,3 +76,8 @@ def decode_role(access_key :str):
     except PyJWTError as e:
         return print(f"error {e}")
     
+
+async def get_password_hash(plain_password):
+    return passwordhash.hash(password=plain_password)
+def verify_password(plain_password, hash_password):
+    return passwordhash.verify(plain_password,hash_password)

@@ -1,14 +1,16 @@
-from fastapi import File, UploadFile,APIRouter,Depends, Query
-from ..dependencies import DbSession,cast_to_json, RequirePermission,get_redis
+from fastapi import File, UploadFile,APIRouter,Depends, Query, BackgroundTasks,Request
+from ....dependencies import DbSession,cast_to_json, RequirePermission,get_redis
 import shutil
 from pathlib import Path
-from  ..schema.images import ImageUpload,ImageDelete
-from ..crud import images as crud_image
+from  ....schema.images import ImageUpload,ImageDelete
+from ....crud import images as crud_image
 from typing import Annotated
 import asyncio
 import redis.asyncio as redis
+from ....crud import logs as crud_logs
+import uuid
 
-from ..schema.template import ResponseTemplate, ResponseTemplateConstructor
+from ....schema.template import ResponseTemplate, ResponseTemplateConstructor
 
 router = APIRouter(
     prefix='/image',
@@ -27,16 +29,21 @@ def save_and_upload(file_path, file):
 @router.post('/upload-image')
 async def upload_image(db: DbSession,body : Annotated[ImageUpload,Depends(cast_to_json)],file: Annotated[UploadFile,File(...)],
                        current_user : Annotated[str,Depends(RequirePermission(['admin','owner']))],
-                       cache : Annotated[redis.Redis, Depends(get_redis)]
+                       cache : Annotated[redis.Redis, Depends(get_redis)],
+                       request : Request,
+                       background_task : BackgroundTasks
                        ):
     is_main = body.is_main
     game_id = body.game_id
+    file.filename = f'{uuid.uuid4()}{file.filename}'
     file_path = UPLOADIMAGE_DIR / file.filename
+    user_id = current_user.get('user_id')
 
     await asyncio.to_thread(save_and_upload,file_path, file.file)
 
-    await crud_image.save_fimename(db=db,filename=str(file_path.as_posix()),is_main=is_main,game_id=game_id)
+    image_id = await crud_image.save_fimename(db=db,filename=str(file_path.as_posix()),is_main=is_main,game_id=game_id)
     await cache.delete("game:all:")
+    background_task.add_task(crud_logs.image_log,db,user_id,image_id,"UPLOAD",request.client.host)
 
     return ResponseTemplateConstructor(200,'OK','uploadded successfully',detail=None)
 
@@ -53,7 +60,18 @@ async def get_image(db: DbSession):
     }
 
 @router.delete('/delete-image-list' , response_model= ResponseTemplate[str])
-async def delete_image_list(db: DbSession, image_id : Annotated[list[int], Query()],current_user : Annotated[str,Depends(RequirePermission(['admin','owner']))], cache : Annotated[redis.Redis, Depends(get_redis)]):
+async def delete_image_list(
+    db: DbSession, 
+    image_id : Annotated[list[int], Query()], 
+    current_user : Annotated[str,Depends(RequirePermission(['admin','owner']))], 
+    cache : Annotated[redis.Redis, Depends(get_redis)],
+    request : Request,
+    background_task : BackgroundTasks
+    ):
     await crud_image.delete_image(db=db,image_id=image_id)
     await cache.delete("game:all:")
+
+    user_id = current_user.get('user_id')
+    background_task.add_task(crud_logs.image_log,db,user_id,image_id,"DELETE",request.client.host)
+    
     return ResponseTemplateConstructor('200','OK','delete successfully',None)

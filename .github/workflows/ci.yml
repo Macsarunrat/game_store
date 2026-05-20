@@ -12,12 +12,15 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Build and start Docker Service
       run: |
         docker compose up -d --Build
-        sleep 10
+        sleep 15
+
+    - name: Check Docker Containers Status
+      run: docker compose ps
 
     - name: Run Pytest
       run: docker compose exec -T backend pytese

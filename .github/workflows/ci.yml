@@ -26,7 +26,7 @@ jobs:
 
         echo "REDIS_URL=redis://redis:6379/0" >> .env
 
-        echo "MAIL_USERNAME=test" >> .env
+        echo "MAIL_USERNAME=test@gmail.com" >> .env
         echo "MAIL_PASSWORD=12346" >> .env
         echo "MAIL_FROM_NAME=test" >> .env
 

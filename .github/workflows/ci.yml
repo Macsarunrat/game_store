@@ -29,6 +29,10 @@ jobs:
         echo "MAIL_USERNAME=test@gmail.com" >> .env
         echo "MAIL_PASSWORD=12346" >> .env
         echo "MAIL_FROM_NAME=test" >> .env
+        
+        echo "STRIPE_SECRET_KEY=sk_test_12345" >> .env
+        echo "STRIPE_PUBLISHABLE_KEY=pk_test_12345" >> .env
+        echo "STRIPE_WEBHOOK=whsec_12345" >> .env
 
     - name: Build and start Docker Service
       run: |

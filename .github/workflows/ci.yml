@@ -23,7 +23,7 @@ jobs:
       run: docker compose ps
 
     - name: Run Pytest
-      run: docker compose exec -T backend pytese
+      run: docker compose exec -T backend pytest
 
 
 

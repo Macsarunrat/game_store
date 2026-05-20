@@ -8,22 +8,19 @@ on:
 
 jobs:
   test-in-docker:
-    runs-on : ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
-    
-    - name : Checkout code
-    - uses : actions/checkout@v4
-
+    - name: Checkout code
+      uses: actions/checkout@v4
 
     - name: Build and start Docker Service
-    run: |
-      docker compose up -d --Build
-
-      sleep 10
+      run: |
+        docker compose up -d --Build
+        sleep 10
 
     - name: Run Pytest
-    run: docker compose exec -T backend pytese
+      run: docker compose exec -T backend pytese
 
 
 

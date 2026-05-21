@@ -44,6 +44,9 @@ jobs:
     - name: Check Docker Containers Status
       run: docker compose ps
 
+    - name: Run Database Migrations
+      run: docker compose exec -T backend alembic upgrade head
+
     - name: Run Pytest
       run: docker compose exec -T backend pytest
 

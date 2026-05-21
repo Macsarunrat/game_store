@@ -21,4 +21,5 @@ class All_Friend(BaseModel):
     status : str | None = None
     lasted_message : str | None = None
     time : datetime | None = None 
+    latest_id : int | None = None
     

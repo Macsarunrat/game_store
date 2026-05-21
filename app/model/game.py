@@ -2,8 +2,8 @@ from sqlmodel import SQLModel, Field, Relationship
 
 
 class Game_catagory(SQLModel,table=True):
-    game_id : int = Field(foreign_key="game.id",primary_key=True)
-    catagory_id : int = Field(foreign_key="catagory.id",primary_key=True)
+    game_id : int = Field(foreign_key="game.id",primary_key=True,ondelete="CASCADE")
+    catagory_id : int = Field(foreign_key="catagory.id",primary_key=True,ondelete="CASCADE")
 
 class Game(SQLModel,table=True):
     id : int | None = Field(primary_key=True)

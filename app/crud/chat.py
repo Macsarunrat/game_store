@@ -9,9 +9,9 @@ async def get_all_user(db: AsyncSession, name : str | None, user_id : int):
 
     lasted_message_subquery = """
             LEFT JOIN (
-            SELECT friendship_id ,message, created_at 
+            SELECT friendship_id ,message, created_at, sender_id
             FROM (
-                SELECT friendship_id , message , created_at, 
+                SELECT friendship_id , message , created_at, sender_id, 
                     ROW_NUMBER() OVER (PARTITION BY friendship_id ORDER BY created_at DESC) as rn
                 FROM chat_history
             ) sub
@@ -21,7 +21,7 @@ async def get_all_user(db: AsyncSession, name : str | None, user_id : int):
     """
 
     base_sql = f"""
-            SELECT u.id,u.first_name, u.last_name, f.status, ch.message AS lasted_message, ch.created_at AS time
+            SELECT u.id,u.first_name, u.last_name, f.status, ch.message AS lasted_message, ch.created_at AS time, ch.sender_id AS latest_id
             FROM "user" u 
             LEFT JOIN friends f ON 
             (f.friend_id = u.id AND f.user_id = :user_id ) OR 

@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
 
 
 
-    await create_db_and_tb()
+    #await create_db_and_tb() np longer what , use alembic
     yield
     if hasattr(app.state, "redis"):
         await app.state.redis.aclose()

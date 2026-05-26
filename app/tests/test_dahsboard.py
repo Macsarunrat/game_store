@@ -27,6 +27,7 @@ async def test_get_dashboard_header(async_client,owner_header):
     assert "total_income" in data.get('detail')
     assert "best_seller_game" in data.get('detail')
     assert "total_order" in data.get('detail')
+    assert "active_user_a_day" in data.get('detail')
 
 
 async def test_get_dashboard_donut_chart(async_client,owner_header):

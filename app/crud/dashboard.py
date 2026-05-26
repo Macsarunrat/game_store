@@ -36,10 +36,10 @@ async def get_header(db: AsyncSession):
     active_user_a_day = (await db.exec(active_user_a_day_query)).scalar()
 
     results = {
-        'total_income' : total_income,
-        'best_seller_game' : best_seller_game[0].get('name'),
-        'total_order' : total_order,
-        'active_user_a_day': active_user_a_day
+        'total_income' : total_income or 0,
+        'best_seller_game' : best_seller_game[0].get('name') if best_seller_game else None,
+        'total_order' : total_order or 0,
+        'active_user_a_day': active_user_a_day or 0
     }
     print(results)
     return results

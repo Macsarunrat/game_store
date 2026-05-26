@@ -1,8 +1,8 @@
-"""fix timezone
+"""initial_schema
 
-Revision ID: cf239f1ecd41
-Revises: 7400f5f0244b
-Create Date: 2026-05-26 10:28:48.705067
+Revision ID: f59a774c2d1e
+Revises: 
+Create Date: 2026-05-26 11:53:07.855122
 
 """
 from typing import Sequence, Union
@@ -13,8 +13,8 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'cf239f1ecd41'
-down_revision: Union[str, Sequence[str], None] = '7400f5f0244b'
+revision: str = 'f59a774c2d1e'
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

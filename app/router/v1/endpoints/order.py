@@ -98,6 +98,11 @@ async def ordered_notification(request: Request,db: DbSession, redis_client: Ann
                 if data['type'] == 'confirm_order':
                     message = {'order_id': data['order_id'], 'is_success': True}
                     yield ServerSentEvent(data=message, retry=5000, event=f'confirm_order:order_id:')
+                print('\n\n\n\n')
+                print("USER ID")
+                if data:
+                    print(data)
+                    print(data['user_id']) 
                 result = await crud_order.get_new_order(db=db,user_id=data['user_id'],game_id=data['game_id'])
                 customer = result['username']
                 game_name = result['name']

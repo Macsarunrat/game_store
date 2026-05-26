@@ -2,10 +2,10 @@ from pydantic import BaseModel
 
 
 class Header(BaseModel):
-    total_income : int
-    best_seller_game : str
-    total_order : int
-    active_user_a_day : int
+    total_income : int | None = None
+    best_seller_game : str | None = None
+    total_order : int | None = None
+    active_user_a_day : int | None = None
 
 class DonutChart(BaseModel):
     category_name : str

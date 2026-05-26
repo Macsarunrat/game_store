@@ -36,7 +36,7 @@ A comprehensive Game Store Management System developed over a **2-month period a
 
 2. Create .env file
     ```bash
-        cp .envexample .env
+        cp .env.example .env
     ```
 3. Run Docker Service
     ```bash

@@ -1,9 +1,11 @@
+from pytest import param
 from sqlmodel import Session,text
 from fastapi import HTTPException
 import os
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.model import order
+from typing import Optional
 
 
 async def get_order(db:AsyncSession):
@@ -25,16 +27,38 @@ async def get_order(db:AsyncSession):
     return [{**dict(item), "image": os.path.basename(item['image'])} for item in results]
 
 
-async def update_status(db: AsyncSession,order_id : int):
-    try : 
+async def update_status(db: AsyncSession,order_id : int | None = None, stripe_session_id : str | None = None):
+    try :
+        # #check if customer has already paid 
+        # check_paid_query = text("""
+        #     SELECT id FROM "order" WHERE id = :order_id AND is_success = true
+        # """)
+        # result = await db.exec(check_paid_query,params={'order_id':order_id})
+
+        # already_paid_record = result.first()
+
+        # if already_paid_record:
+        #     return "You've already paid this game"
+            
+
+
+        params = {'order_id':int(order_id)}
+        stripe_query = ""
+
+        if stripe_session_id:
+            stripe_query = ", stripe_session_id = :stripe_session_id"
+            params = {'order_id':order_id,'stripe_session_id': stripe_session_id}
+
         sql_query = text(
-            'UPDATE "order" SET is_success = true WHERE id = :order_id ' \
+            f'UPDATE "order" SET is_success = true {stripe_query}  WHERE id = :order_id ' \
             'RETURNING user_id'
         )
-        result = (await db.exec(sql_query,params={'order_id':order_id})).mappings().first()
+        result = (await db.exec(sql_query,params=params)).mappings().first()
         await db.commit()
         return result
     except Exception as e:
+        await db.rollback()
+        print(f'Error {e}')
         raise HTTPException(status_code=400,detail=f"ไม่สามารถยืนยันรายการได้ {e}")
 
 
@@ -63,7 +87,7 @@ async def get_confirm_order(db:AsyncSession, order_id: int):
 
 async def get_order_by_id(db :AsyncSession, order_id: int):
     sql_query = text(
-        'SELECT u.first_name, o.id , g.name, g.price FROM "order" o ' \
+        'SELECT u.first_name, o.id , g.name, g.price,g.description,u.email FROM "order" o ' \
         'JOIN "user" u ON o.user_id = u.id ' \
         'JOIN game g ON o.game_id = g.id ' \
         'WHERE o.id = :order_id'
@@ -72,3 +96,16 @@ async def get_order_by_id(db :AsyncSession, order_id: int):
     results = (await db.exec(sql_query,params={'order_id':order_id})).mappings().first()
 
     return results 
+
+
+async def check_owner_order(db: AsyncSession, order_id:int, user_id:int):
+    sql_query = text(
+        """
+        SELECT * FROM "order" WHERE id=:order_id AND user_id=:user_id
+        """
+    )
+    result = await db.exec(sql_query,params={'order_id':order_id,'user_id':user_id})
+    order_data = result.mappings().first()
+    if not order_data:
+        raise HTTPException(status_code=400,detail='This order is not belong to you')
+    return order_data

@@ -157,16 +157,36 @@ async def update_game(db: AsyncSession,game_name: str | None, description :str |
 async def buy_game(db: AsyncSession,user_id: int, game_id : int):
     try:
         sql_query = text(
-            'INSERT INTO "order" (user_id,game_id) ' \
-            'VALUES (:user_id, :game_id) ')
-        await db.exec(sql_query,params={'user_id':user_id, 'game_id':game_id})
+            """
+            WITH new_order AS (
+                INSERT INTO "order" (user_id,game_id) 
+                VALUES (:user_id, :game_id)
+            RETURNING id, game_id
+            )
+            SELECT new_order.id AS order_id, g.price, g.name, g.description, u.email
+            FROM new_order
+            JOIN game g on g.id = new_order.game_id 
+            JOIN "user" u ON u.id = :user_id
+            """
+        )
+        results = (await db.exec(sql_query,params={'user_id':user_id, 'game_id':game_id})).mappings().first()
         await db.commit()
+        return results
         
     except IntegrityError:
         raise HTTPException(status_code=400, detail="ไม่สามารถซื้อเกมที่มีแล้วได้")
     except Exception as e:
         raise HTTPException(status_code=400,detail=f'ไม่สามารถทำรายการซื้อสินค้าได้ {e}')
     
+
+async def save_session(db: AsyncSession,order_id: int, session_id):
+    sql_query = text(
+        '''
+        UPDATE "order" SET stripe_session_id = :session_id WHERE id = :order_id
+        '''
+    )
+    await db.exec(sql_query,params={'session_id': session_id, 'order_id': order_id})
+    await db.commit()
 
 # async def customer_game(db : Session, user_id: int):
 #     sql_query = text('' \

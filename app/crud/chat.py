@@ -1,3 +1,4 @@
+from sentry_sdk.transport import Http2Transport
 from sqlmodel import Session, text
 from fastapi import HTTPException
 from datetime import datetime
@@ -21,7 +22,7 @@ async def get_all_user(db: AsyncSession, name : str | None, user_id : int):
     """
 
     base_sql = f"""
-            SELECT u.id,u.first_name, u.last_name, f.status, ch.message AS lasted_message, ch.created_at AS time, ch.sender_id AS latest_id
+            SELECT u.id,u.first_name, u.last_name, f.status,f.requester_id , ch.message AS lasted_message, ch.created_at AS created_at, ch.sender_id AS latest_id
             FROM "user" u 
             LEFT JOIN friends f ON 
             (f.friend_id = u.id AND f.user_id = :user_id ) OR 
@@ -65,11 +66,19 @@ async def add_friend(db : AsyncSession , user_id: int , friend_id : int):
 
         smaller_id, larger_id = (user_id, friend_id) if user_id < friend_id else (friend_id,user_id)
 
-        sql_query = text(' ' \
+        insert_query = text(' ' \
         'INSERT INTO FRIENDS (user_id,friend_id, requester_id,status) ' \
         'VALUES (:user_id,:friend_id,:requester_id,:status) ')
-        await db.exec(sql_query, params={'user_id':smaller_id,'friend_id': larger_id,'requester_id':requester_id, 'status': 'pending'})
+        await db.exec(insert_query, params={'user_id':smaller_id,'friend_id': larger_id,'requester_id':requester_id, 'status': 'pending'})
+
+        requester_query = text("""
+
+            SELECT first_name , last_name FROM "user" WHERE id = :requester_id
+            """)
+        result = (await db.exec(requester_query,params={'requester_id':requester_id})).mappings().first()
+
         await db.commit()
+        return result
     except IntegrityError :
         raise HTTPException(status_code=400, detail='ไม่สามารถเพิ่มเพื่อนที่มีอยู่แล้วได้')
 
@@ -113,13 +122,21 @@ async def get_history(db: AsyncSession, friendship_id : int):
 
 
 async def confirm_friend(db: AsyncSession,user_id: int, friend_id : int):
+    try:
+        lower_id = min(user_id,friend_id)
+        higher_id = max(user_id,friend_id)
 
-    lower_id = min(user_id,friend_id)
-    higher_id = max(user_id,friend_id)
+        sql_query = text(
+            "UPDATE friends set status = 'friend' " \
+            "WHERE user_id = :user_id AND friend_id = :friend_id AND status != 'friend'"
+        )
+        result = await db.exec(sql_query,params={'user_id':lower_id,'friend_id':higher_id})
+        await db.commit()
 
-    sql_query = text(
-        "UPDATE friends set status = 'friend' " \
-        "WHERE user_id = :user_id AND friend_id = :friend_id"
-    )
-    await db.exec(sql_query,params={'user_id':lower_id,'friend_id':higher_id})
-    await db.commit()
+        if result.rowcount == 0:
+            raise HTTPException(
+                status_code=400,
+                detail=f'You are already friends or no pending request found.'
+            )
+    except Exception as e:
+        raise HTTPException(status_code=400,detail=f'Error : {e}')

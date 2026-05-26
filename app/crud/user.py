@@ -1,6 +1,7 @@
 from sqlmodel import text, Session
 from fastapi import HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 
 async def login(db: AsyncSession, username,jti: str):
@@ -94,10 +95,14 @@ async def check_owner_refresh_key(db: AsyncSession, jti : str):
     return results
 
 
-async def register(db: AsyncSession, username:str, password: str, first_name: str,last_name: str):
-    sql_query = text(
-        'INSERT INTO "user" (username,password,first_name,last_name,role_id) ' \
-        'VALUES (:username,:password,:first_name, :last_name,1) '
-    )
-    await db.exec(sql_query,params={'username':username,'password': password,'first_name':first_name,'last_name':last_name})
-    await db.commit()
+async def register(db: AsyncSession, username:str, password: str, first_name: str,last_name: str, email : str):
+    try:
+        sql_query = text(
+            'INSERT INTO "user" (username,password,first_name,last_name,role_id,email) ' \
+            'VALUES (:username,:password,:first_name, :last_name,1,:email) '
+        )
+        await db.exec(sql_query,params={'username':username,'password': password,'first_name':first_name,'last_name':last_name,'email':email})
+        await db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(400,detail='username นี้ไม่สามารถใช้ได้')

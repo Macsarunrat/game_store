@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from app.router.v1.endpoints import chat, dashboard, game, images, order, user,email
+from app.router.v1.endpoints import chat, dashboard, game, images, order, user,email,stripe
 
 
 
@@ -14,3 +14,4 @@ api_v1_router.include_router(images.router)
 api_v1_router.include_router(chat.router)
 api_v1_router.include_router(dashboard.router)
 api_v1_router.include_router(email.router)
+api_v1_router.include_router(stripe.router)

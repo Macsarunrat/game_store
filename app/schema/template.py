@@ -7,7 +7,7 @@ T = TypeVar("T")
 class ResponseTemplate(BaseModel, Generic[T]):
     status_code : int
     status : str
-    message : str
+    message : str | dict
     detail : Optional[T] = None
 
 

@@ -10,8 +10,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import redis.asyncio as redis
 import os
+import asyncio
+from app.core.websocket import global_event_listener
 
-from app.utils import stripe
+from app.router.v1.endpoints import stripe
 
 
 redis_client : redis.Redis | None = None
@@ -20,7 +22,6 @@ redis_url = os.getenv("REDIS_URL","redis://localhost:6379/0")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global redis_client
 
     redis_client = redis.from_url(
         url=redis_url,
@@ -34,10 +35,14 @@ async def lifespan(app: FastAPI):
     except redis.ConnectionError:
         print('Failed to connect to redis')
 
+    listen_event = asyncio.create_task(global_event_listener(app.state.redis))
+
 
 
     #await create_db_and_tb() np longer what , use alembic
     yield
+
+    listen_event.cancel()
     if hasattr(app.state, "redis"):
         await app.state.redis.aclose()
 
@@ -47,7 +52,6 @@ app = FastAPI(lifespan=lifespan,title="Game Shop",version='1.0.0')
 
 
 app.include_router(api_v1_router)
-app.include_router(stripe.router)
 
 app.mount('/static',StaticFiles(directory="upload"),'upload')
 

@@ -1,6 +1,9 @@
-from fastapi import APIRouter,Depends, BackgroundTasks, Request
+from anyio import current_effective_deadline
+from fastapi import APIRouter,Depends, BackgroundTasks, HTTPException, Request
+from requests import session
 from ....dependencies import DbSession,RequirePermission,get_redis,get_user
 from ....crud import order as crud_order
+from ....crud import game as crud_game
 from ....schema.template import ResponseTemplate, ResponseTemplateConstructor
 from ....schema.order import OrderResponse
 from typing import Annotated
@@ -13,6 +16,7 @@ import json
 from app.utils.channel import new_order_channel, confirm_ordered
 from app.schema.email import SendEmail
 from app.utils.email import send_email
+from app.utils.stripe import Stripe
 
 router = APIRouter(
     prefix='/order',
@@ -54,7 +58,7 @@ async def confirm_order(db : DbSession,
     email_detail = await crud_order.get_order_by_id(db,order_id=order_id)
     print(email_detail)
     data = {
-        "email" : "tdtayranoo@gmail.com",
+        "email" : email_detail.get('email'),
         "customer_name" : email_detail.get('first_name'),
         "order_id" : email_detail.get('id'),
         "game" : email_detail.get('name'),
@@ -151,6 +155,32 @@ async def order_confirm_successfully(db: DbSession, request: Request, redis_clie
         await pubsub.unsubscribe(channel)
         await pubsub.close()
 
-
     
-   
+@router.post('/pay-again',response_model=ResponseTemplate[dict])
+async def customer_pay_again(db: DbSession, order_id: int, current_user : Annotated[str,Depends(get_user)]):
+    """
+    For customer pay again
+    """
+    try:
+        # if you are owner of this order
+        user_id = current_user.get('user_id')
+        if user_id :
+            order_data = await crud_order.check_owner_order(db=db,order_id=order_id,user_id=user_id)
+
+        if order_data and order_data.get('is_success') is True :
+            raise HTTPException(status_code=400,detail="You've already paid this game")
+        
+        game_data = await crud_order.get_order_by_id(db=db,order_id=order_id)
+        game_name = game_data.get('name')
+        game_price = game_data.get('price')
+        game_description = game_data.get('description')
+        customer_email = game_data.get('email')
+        session = await Stripe.strip_create_session(order_id=order_id,game_name=game_name,game_price=game_price, game_description=game_description,customer_email=customer_email)
+        message = {
+            'order_id' : order_id,
+            'checkout': session.url,
+            'mode': 'stripe'
+        }
+        return ResponseTemplateConstructor(200,'OK','กำลังพาไปยัง Stripe' ,message)
+    except Exception as e:
+        raise HTTPException(status_code=400,detail=f'Error {e}')

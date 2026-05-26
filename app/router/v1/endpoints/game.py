@@ -1,9 +1,11 @@
 from fastapi import APIRouter,Depends,HTTPException,status, Query, Request, BackgroundTasks
+
+from app.utils.stripe import Stripe
 from ....schema.game import GameResponse,GameCreate,GameCatagoryResponse,GameDelete,GameUpdate,CatagoryResponse,BuyGameRequest
 from ....schema.template import ResponseTemplate,ResponseTemplateConstructor
 from ....dependencies import DbSession,RequirePermission,get_user, get_redis
 from ....crud import game as crud_game
-from typing import Annotated
+from typing import Annotated, Any
 import json
 from .order import ordered_notification
 import redis.asyncio as redis
@@ -11,6 +13,8 @@ from app.utils.channel import new_order_channel
 from ....crud.logs import save_log
 from ....model.logs import Game_Logs
 from ....crud.logs import game_log
+import stripe
+
 
 
 
@@ -138,7 +142,7 @@ async def get_catagory(db: DbSession, current_user : Annotated[str,Depends(Requi
 
 
 
-@router.post('/buy',response_model=ResponseTemplate[str])
+@router.post('/buy',response_model=ResponseTemplate[Any])
 async def buy_game(db: DbSession, 
                    body : BuyGameRequest, 
                    current_user : Annotated[str, Depends(RequirePermission(['customer']))], 
@@ -151,13 +155,56 @@ async def buy_game(db: DbSession,
     user_id = user_data['user_id']
     game_id = body.game_id
 
-    await crud_game.buy_game(db,user_id,game_id)
+    results = await crud_game.buy_game(db,user_id,game_id)
+    order_id = results['order_id']
+    game_price = results['price']
+    game_name = results['name']
+    game_description = results['description']
+    customer_email = results['email']
 
-
+    #alert zone
     message = {'user_id':int(user_id),'game_id': int(game_id),'type':'new_order'}
     json_data = json.dumps(message,ensure_ascii=False)
-
     await redis_client.publish(channel=new_order_channel,message=json_data)
+
+    # success_url = f"http://localhost:4200/payment/success?order_id={order_id}"
+    # cancel_url = f"http://localhost:4200/payment/cancel?order_id={order_id}"
+
+
+    try:
+        session = await Stripe.strip_create_session(game_price=game_price,order_id=order_id,game_name=game_name,game_description=game_description,customer_email=customer_email)
+        # session = stripe.checkout.Session.create(
+        #     payment_method_types=['promptpay','card'],
+        #     line_items= [
+        #         {
+        #             'price_data':{
+        #                 'currency':'thb',
+        #                 'product_data': {'name':f'Game id {game_id}'},
+        #                 'unit_amount': (game_price*100)
+        #             },
+        #             "quantity":1
+        #         }
+        #     ],
+        #     mode='payment',
+        #     success_url=success_url,
+        #     cancel_url=cancel_url,
+        #     metadata= {
+        #         'order_id' : order_id
+        #     }
+
+        # )
+
+        #save order_id in database
+        await crud_game.save_session(db,order_id=order_id,session_id=session.id)
+
+        success_message = {
+            "order_id": order_id,
+            "checkout": session.url,
+            'mode': "stripe"
+        }
+        return ResponseTemplateConstructor(200,'OK','ทำรายการสำเร็จไปยัง stripe เพื่อทำการชำระเงิน',success_message) 
+    except Exception as e:
+        print(f'Stripe Payment System Error : {e}')
 
     return ResponseTemplateConstructor(200,'OK','ทำรายการสั่งซื้อสำเร็จ',None) 
 

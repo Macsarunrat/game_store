@@ -27,10 +27,19 @@ async def get_header(db: AsyncSession):
     )
     total_order = (await db.exec(total_order_query)).scalar()
 
+    active_user_a_day_query = text(
+        """
+        SELECT COUNT(id) FROM user_refresh_token
+        WHERE is_active = true AND DATE(create_at) >= CURRENT_DATE;
+        """
+    )
+    active_user_a_day = (await db.exec(active_user_a_day_query)).scalar()
+
     results = {
         'total_income' : total_income,
         'best_seller_game' : best_seller_game[0].get('name'),
-        'total_order' : total_order
+        'total_order' : total_order,
+        'active_user_a_day': active_user_a_day
     }
     print(results)
     return results
@@ -101,3 +110,16 @@ async def get_bar_chart(db: AsyncSession):
     results = (await db.exec(sql_query)).mappings().all()
 
     return results
+
+
+async def get_trend_line_chart(db: AsyncSession):
+    sql_query = text(
+        """
+        SELECT DATE(o.date),SUM(g.price) as income FROM game g
+        JOIN "order" o ON o.game_id = g.id
+        GROUP BY 1
+        """
+    )
+
+    trend_line =(await db.exec(sql_query)).mappings().all()
+    return trend_line

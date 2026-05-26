@@ -1,4 +1,5 @@
 from fastapi import Depends,HTTPException,status,Form, Request
+from sqlalchemy import HasSuffixes
 from sqlmodel import Session
 from app.core.database import engine
 from typing import Annotated
@@ -7,6 +8,7 @@ from .schema.images import ImageUpload
 import redis.asyncio as redis
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.core.database import get_database_session
+from fastapi import WebSocket
 
 
 
@@ -56,3 +58,9 @@ async def get_redis(request : Request) -> redis.Redis:
     if not hasattr(request.app.state, "redis") or request.app.state.redis is None :
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="redis is not working")
     return request.app.state.redis
+
+
+async def get_redis_ws(websocket: WebSocket) -> redis.Redis:
+    if not hasattr(websocket.app.state, "redis") or websocket.app.state.redis is None :
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail="redis is not working")
+    return websocket.app.state.redis

@@ -1,35 +1,34 @@
-import email
-
 import stripe
-from ..schema.stripe import PaymentRequest
-from app.core.settings import settings
-from fastapi import APIRouter
 
 
-router = APIRouter(
-    prefix='/stripe',
-    tags=['stripe']
-)
 
 
-stripe.api_key = settings.stripe_secret_key
-
-@router.post('/create_payment')
-async def create_payment(request : PaymentRequest):
-    try:
-        intent = stripe.PaymentIntent.create(
-            amount=request.amount,
-            currency=request.currency,
-            receipt_email=request.customer_email,
-            payment_method="pm_card_visa",
-            confirm=True,
-            return_url=settings.domain
-        )
-        return {
-            "Payment_intent_id" : intent.id,
-            "status" : intent.status
-        }
-
-    except Exception as e:
-        return e
-
+class Stripe():
+            
+    
+    @staticmethod
+    async def strip_create_session(game_price : int, order_id : int, game_name : str | None,game_description : str, customer_email: str):
+        success_url = f"http://localhost:4200/payment/success?order_id={order_id}"
+        cancel_url = f"http://localhost:4200/payment/cancel?order_id={order_id}"
+            
+        session = stripe.checkout.Session.create(
+            customer_email= customer_email,
+            payment_method_types=['promptpay','card'],
+            line_items= [
+                {
+                    'price_data':{
+                        'currency':'thb',
+                        'product_data': {'name':f'Game : {game_name}','description':f'คำอธิบายเกม\n {game_description}'},
+                        'unit_amount':game_price*100
+                    },
+                    "quantity":1
+                }
+            ],
+            mode='payment',
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata= {
+                'order_id' : order_id
+                }
+            )
+        return session

@@ -1,13 +1,23 @@
+import asyncio
+
+from httpcore import AnyIOBackend
+
+from app.utils import channel
+
 from ....core.websocket import ConnectionManager
 from fastapi import APIRouter, Depends, status, HTTPException, WebSocket, WebSocketDisconnect,status,Depends
 from ....core.authentication import decode_jwt
-from ....dependencies import DbSession,get_user
+from ....dependencies import DbSession,get_user, get_redis_ws, get_redis
 from ....crud import chat as crud_chat
 from ....schema.chat import Friend,All_Friend
 from typing import Annotated
 from ....schema.template import ResponseTemplate, ResponseTemplateConstructor
 from datetime import datetime
 from fastapi.encoders import jsonable_encoder
+import redis.asyncio as redis
+from app.utils.channel import global_event
+from app.core.websocket import manager
+import json
 
 router = APIRouter(
     prefix='/chat',
@@ -15,9 +25,8 @@ router = APIRouter(
 )
 
 
-manager = ConnectionManager()
 @router.websocket('/ws/me')
-async def websocket_endpoint(websocket : WebSocket, db: DbSession):
+async def websocket_endpoint(websocket : WebSocket, db: DbSession, redis_client : Annotated[redis.Redis,Depends(get_redis_ws)]):
     print("\n\n\n\n")
     print(f"🔥 มีคนพยายามเชื่อมต่อเข้ามา!")
     try:
@@ -36,6 +45,8 @@ async def websocket_endpoint(websocket : WebSocket, db: DbSession):
         print(user_id)
 
         await manager.connect(websocket,user_id)
+        
+        
             
         while True:
             try:
@@ -63,7 +74,15 @@ async def websocket_endpoint(websocket : WebSocket, db: DbSession):
 
                 await crud_chat.save_chat(db=db,user_id=user_id,friendship_id=friendship_id.get('id'),message=message,created_at=created_at)
 
-                await manager.send_to_user(message=message, receiver_id=receiver_id,time=created_at,sender_id=user_id)
+                chat_payload = {
+                    'type' : 'chat_message',
+                    'message' : message,
+                    'receiver_id' : receiver_id,
+                    'time' : created_at,
+                    'sender_id' : user_id
+                }
+
+                await redis_client.publish(global_event,json.dumps(chat_payload,default=str))
 
 
             except Exception as e:
@@ -91,6 +110,31 @@ async def example():
         "receiver_id" : "ระบุผู้รับ",
         "message" : "ข้อความที่ส่งหากัน"
     }
+
+    การรับข้อมูลแชท
+    {
+        "type": "chat_message",
+        "message": "ทำไย",
+        "receiver_id": 29,
+        "time": "2026-05-22 13:37:58.604299",
+        "sender_id": 30
+    }
+
+    การรับเหตุการณ์ถูกขอเป็นเพื่อน
+    {
+        'type' : 'add_friend',
+        'requester_id' : คนที่ขอเข้ามา,
+        'receiver_id' : friend_id
+    }
+
+    การรับเหตุการณ์ยืนยันการเป็นเพื่อน
+    {
+        'type': 'confirm_friend',
+        'receiver_id' : friend_id,
+        'confirm_from_id' : คนที่ยืนยัน
+    }
+
+    
     
     """
     return
@@ -116,19 +160,39 @@ async def get_all_user(db: DbSession, user_data : Annotated[str,Depends(get_user
 
 
 @router.post('/add/new-friend', response_model=ResponseTemplate[str])
-async def add_new_friend(db: DbSession, body : Friend,current_user : Annotated[str,Depends(get_user)]):
+async def add_new_friend(db: DbSession, body : Friend,current_user : Annotated[str,Depends(get_user)], redis_client : Annotated[redis.Redis,Depends(get_redis)]):
     user_id = current_user.get('user_id')
     friend_id = body.friend_id
-    await crud_chat.add_friend(db,user_id,friend_id)
+    requester_data = await crud_chat.add_friend(db,user_id,friend_id)
+
+    channel = global_event
+    message = {
+        'type' : 'add_friend',
+        'requester_id' : user_id,
+        'first_name': requester_data.get('first_name'),
+        'last_name': requester_data.get('last_name'),
+        'receiver_id' : friend_id
+    }
+    json_data = json.dumps(message)
+    await redis_client.publish(channel,json_data)
     return ResponseTemplateConstructor('200','OK','Add new friend successfully', None)
 
 
 @router.post('/confirm/friend' , response_model=ResponseTemplate[str])
-async def confirm_friend(db: DbSession , body : Friend, current_user : Annotated[str, Depends(get_user)]):
+async def confirm_friend(db: DbSession , body : Friend, current_user : Annotated[str, Depends(get_user)], redis_client : Annotated[redis.Redis, Depends(get_redis)]):
     user_id = current_user.get('user_id')
     friend_id = body.friend_id
 
     await crud_chat.confirm_friend(db,user_id,friend_id)
+
+    channel =  global_event
+    message = {
+        'type': 'confirm_friend',
+        'receiver_id' : friend_id,
+        'confirm_from_id' : user_id
+    }
+    json_data = json.dumps(message)
+    await redis_client.publish(channel,json_data)
     
     return ResponseTemplateConstructor('200','OK','Confirm adding friend successfully',None)
 

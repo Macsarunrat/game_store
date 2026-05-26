@@ -115,10 +115,11 @@ async def register(db: DbSession, body : UserRegister):
     plain_password = body.password
     first_name = body.first_name
     last_name = body.last_name
+    email = body.email
 
     hash_password = await get_password_hash(plain_password)
 
-    await crud_user.register(db=db,username=username,password=hash_password,first_name=first_name,last_name=last_name)
+    await crud_user.register(db=db,username=username,password=hash_password,first_name=first_name,last_name=last_name,email=email)
 
     return ResponseTemplateConstructor(200,'OK','register successfully',None)
 

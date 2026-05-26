@@ -20,6 +20,7 @@ class All_Friend(BaseModel):
     last_name : str
     status : str | None = None
     lasted_message : str | None = None
-    time : datetime | None = None 
+    created_at : datetime | None = None 
     latest_id : int | None = None
+    requester_id : int | None = None
     

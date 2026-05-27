@@ -5,7 +5,7 @@ from ....schema.template import ResponseTemplate, ResponseTemplateConstructor
 from fastapi.encoders import jsonable_encoder
 from ....schema.dashboard import Header,DonutChart,BarChart,TrendlineChart
 from typing import List ,Annotated
-
+from datetime import date
 router = APIRouter(
     prefix='/dashboard',
     tags=['dashboard']
@@ -34,7 +34,10 @@ async def get_bar_chart(db: DbSession, current_user : Annotated[str,Depends(Requ
 
 @router.get('/chart/trendline', response_model=ResponseTemplate[List[TrendlineChart]])
 async def get_trendline_chart(db: DbSession, current_user : Annotated[str,Depends(RequirePermission(['owner']))]):
-    results = await crud_dashboard.get_trend_line_chart(db)
+    month = date.today().month
+    day = date.today().day
+    year = date.today().year
+    results = await crud_dashboard.get_trend_line_chart(db,month,day,year)
     json_data = jsonable_encoder(results)
 
     return ResponseTemplateConstructor(200,'OK','Fetch trendline chart', json_data)

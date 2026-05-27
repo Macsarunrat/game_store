@@ -55,7 +55,8 @@ async def get_chart_donut(db : AsyncSession):
         'LEFT JOIN game_catagory gc ON c.id = gc.catagory_id '
         'LEFT JOIN "order" o ON o.game_id = gc.game_id AND o.is_success = true '
 		'LEFT JOIN game g ON o.game_id = g.id ' \
-		'GROUP BY c.name '
+		'GROUP BY c.name ' \
+        'ORDER BY income DESC'
     )
 
     results = (await db.exec(sql_query)).mappings().all()
@@ -112,7 +113,7 @@ async def get_bar_chart(db: AsyncSession):
     return results
 
 
-async def get_trend_line_chart(db: AsyncSession):
+async def get_trend_line_chart(db: AsyncSession,month: int, day: int, year:int):
     sql_query = text(
         """
         SELECT DATE(o.date),SUM(g.price) as income FROM game g
@@ -121,5 +122,27 @@ async def get_trend_line_chart(db: AsyncSession):
         """
     )
 
-    trend_line =(await db.exec(sql_query)).mappings().all()
+    sql_query_1_year = text(
+        """
+WITH date_bounds AS(
+SELECT
+MAKE_DATE(:year,1,1) as start_date,
+MAKE_DATE(:year,:month, :day) AS end_date
+)
+
+SELECT TO_CHAR(series.day, 'YYYY-MM-DD') as "date",
+COALESCE(SUM(g.price),0) as income
+
+FROM date_bounds,
+generate_series(start_date,end_date, '1 day'::interval) as series(day)
+LEFT JOIN "order" o ON series.day = DATE(o.date)
+LEFT JOIN game g ON o.game_id = g.id
+GROUP BY series.day
+ORDER BY series.day ASC
+
+
+        """
+    )
+
+    trend_line =(await db.exec(sql_query_1_year,params={'month':month,'day':day,'year':year})).mappings().all()
     return trend_line

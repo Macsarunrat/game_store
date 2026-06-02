@@ -1,5 +1,6 @@
 import asyncio
 
+from fastapi.websockets import WebSocketState
 from httpcore import AnyIOBackend
 
 from app.utils import channel
@@ -51,43 +52,54 @@ async def websocket_endpoint(websocket : WebSocket, db: DbSession, redis_client 
         while True:
             try:
                 data = await websocket.receive_json()
+                event_type = data.get('type')
 
 
                 # for keeping connection
-                if data.get('type') == 'ping':
+                if event_type == 'ping':
                     await websocket.send_json({'type':'pong'})
                     continue
 
+                elif event_type == 'chat_message':
+                    receiver_id = data['receiver_id']
+                    message = data['message']
+                    created_at = datetime.now()
+                    
 
-                receiver_id = data['receiver_id']
-                message = data['message']
-                created_at = datetime.now()
-                
+                    #check if both of you are friend before send message
+                    friendship_id = await crud_chat.is_friend(db=db,user_id=user_id,friend_id=receiver_id)
+                    if not friendship_id:
+                        await websocket.send_json({'Error': 'You are not friends'})
+                        continue
 
-                #check if both of you are friend before send message
-                friendship_id = await crud_chat.is_friend(db=db,user_id=user_id,friend_id=receiver_id)
-                if not friendship_id:
-                    await websocket.send_json({'Error': 'You are not friends'})
-                    continue
+                    
 
-                
+                    await crud_chat.save_chat(db=db,user_id=user_id,friendship_id=friendship_id.get('id'),message=message,created_at=created_at)
 
-                await crud_chat.save_chat(db=db,user_id=user_id,friendship_id=friendship_id.get('id'),message=message,created_at=created_at)
+                    chat_payload = {
+                        'type' : 'chat_message',
+                        'message' : message,
+                        'receiver_id' : receiver_id,
+                        'time' : created_at,
+                        'sender_id' : user_id
+                    }
 
-                chat_payload = {
-                    'type' : 'chat_message',
-                    'message' : message,
-                    'receiver_id' : receiver_id,
-                    'time' : created_at,
-                    'sender_id' : user_id
-                }
+                    await redis_client.publish(global_event,json.dumps(chat_payload,default=str))
+                else:
+                    print(f'ระบบแจ้งเตือน event')
 
-                await redis_client.publish(global_event,json.dumps(chat_payload,default=str))
-
+            except WebSocketDisconnect:
+                raise
 
             except Exception as e:
-                print(f"⚠️ เกิดข้อผิดพลาดระหว่างแชท: {e}")
-                await websocket.send_json({"error": f"ระบบเซิร์ฟเวอร์ขัดข้องในการส่งข้อความ {e}"})
+                print(f"⚠️ เกิดข้อผิดพลาดระหว่างส่งข้อมูล: {e}")
+                
+                # เช็คก่อนว่าสายยังต่ออยู่ ค่อยส่งข้อความ Error กลับไป
+                if websocket.client_state == WebSocketState.CONNECTED:
+                    try:
+                        await websocket.send_json({"error": f"ระบบขัดข้อง: {str(e)}"})
+                    except RuntimeError:
+                        pass # กันเหนียวเผื่อจังหวะเสี้ยววินาทีนั้นสายหลุดพอดี
 
     except WebSocketDisconnect:
         manager.disconnect(user_id=user_id)

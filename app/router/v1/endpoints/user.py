@@ -18,38 +18,32 @@ router = APIRouter(
 
 @router.post('/login',response_model=ResponseTemplate[UserLoginResponse])
 async def login(db : DbSession, form_data : Annotated[OAuth2PasswordRequestForm,Depends()]):
-    try:
-        jti = str(uuid.uuid4())
+    jti = str(uuid.uuid4())
 
-        username = form_data.username
-        password = form_data.password
-        result = await crud_user.login(db,username=username, jti=jti)
+    username = form_data.username
+    password = form_data.password
+    result = await crud_user.login(db,username=username, jti=jti)
 
-        if not result :
-            return ResponseTemplateConstructor(
-                401,'UNORTHORIZED','username หรือ password ไม่ถูกต้อง',None
-                )
-        if not verify_password(plain_password=password, hash_password=result['password']):
-            raise HTTPException(status_code=401,detail='username หรือ password ไม่ถูกต้อง')
+    if not result or not verify_password(password,result['password']):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail='username หรือ password ไม่ถูกต้อง')
         
-        #permissions = await crud_user.get_role_and_permission(db=db,username=username)
-        role_name = result['role_name']
-        user_id = result['user_id']
+    
+    #permissions = await crud_user.get_role_and_permission(db=db,username=username)
+    role_name = result['role_name']
+    user_id = result['user_id']
 
 
-        
-        access_key = create_access_token({'sub':username,'role_name': role_name,'user_id': user_id})
-        refresh_key = create_refresh_token({'sub':username,'jti':jti})
+    
+    access_key = create_access_token({'sub':username,'role_name': role_name,'user_id': user_id})
+    refresh_key = create_refresh_token({'sub':username,'jti':jti})
 
-        result.update({'token':{
-            'access_token': access_key,
-            'refresh_token' : refresh_key,
-            'token_type':'bearer'
-        }})
-        
-        
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,detail=f"Error {e}")
+    result.update({'token':{
+        'access_token': access_key,
+        'refresh_token' : refresh_key,
+        'token_type':'bearer'
+    }})
+    
+
 
     return ResponseTemplateConstructor(
         200,'OK','Login successfully',result

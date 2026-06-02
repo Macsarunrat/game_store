@@ -1,3 +1,6 @@
+from datetime import date
+from string import ascii_uppercase
+
 from sqlmodel import Session,text
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -113,36 +116,62 @@ async def get_bar_chart(db: AsyncSession):
     return results
 
 
-async def get_trend_line_chart(db: AsyncSession,month: int, day: int, year:int):
-    sql_query = text(
-        """
-        SELECT DATE(o.date),SUM(g.price) as income FROM game g
-        JOIN "order" o ON o.game_id = g.id
-        GROUP BY 1
-        """
-    )
+async def get_trend_line_chart(db: AsyncSession,start_date: date,end_date:date, step: str, date_format: str):
+
+    print("====== ข้อมูลที่จะส่งเข้า Database ======")
+    print(f"Start Date: {repr(start_date)}") 
+    print(f"End Date: {repr(end_date)}")
+    print("========================================")
+    
 
     sql_query_1_year = text(
-        """
-WITH date_bounds AS(
-SELECT
-MAKE_DATE(:year,1,1) as start_date,
-MAKE_DATE(:year,:month, :day) AS end_date
-)
+        f"""
+        SELECT TO_CHAR(series.day AT TIME ZONE 'Asia/Bangkok', :date_format) as "date",
+        COALESCE(SUM(g.price),0) as income
 
-SELECT TO_CHAR(series.day, 'YYYY-MM-DD') as "date",
-COALESCE(SUM(g.price),0) as income
-
-FROM date_bounds,
-generate_series(start_date,end_date, '1 day'::interval) as series(day)
-LEFT JOIN "order" o ON series.day = DATE(o.date)
-LEFT JOIN game g ON o.game_id = g.id
-GROUP BY series.day
-ORDER BY series.day ASC
+        FROM
+        generate_series(CAST(:start_date AS TIMESTAMPTZ),CAST(:end_date AS TIMESTAMPTZ), CAST(:step AS INTERVAL)) as series(day)
+        LEFT JOIN "order" o 
+            ON o.date >= series.day 
+            AND o.date < (series.day + CAST(:step AS INTERVAL)) 
+        LEFT JOIN game g ON o.game_id = g.id
+        GROUP BY series.day
+        ORDER BY series.day ASC
 
 
         """
     )
 
-    trend_line =(await db.exec(sql_query_1_year,params={'month':month,'day':day,'year':year})).mappings().all()
+    trend_line =(await db.exec(sql_query_1_year,params={'start_date':start_date,'end_date':end_date,'step':step,'date_format':date_format})).mappings().all()
     return trend_line
+
+
+async def get_v2_donut_chart(db: AsyncSession, category_id : int, start_date: date, end_date: date):
+
+    print("====== ข้อมูลที่จะส่งเข้า Database ======")
+    print(start_date)
+    print(end_date)
+    sql_query = text(
+        """
+        SELECT g.name AS game_name, COUNT(o.id) AS count_order ,c.name FROM "order" o 
+        LEFT JOIN game g ON o.game_id = g.id
+        LEFT JOIN game_catagory gc ON g.id = gc.game_id
+        LEFT JOIN catagory c ON  gc.catagory_id =c.id 
+        WHERE c.id = :category AND o.is_success = true AND o.date >= CAST(:start_date AS TIMESTAMP) AND o.date < CAST(:end_date AS TIMESTAMP)
+        GROUP BY g.name , c.name
+
+        """
+    )
+    results = (await db.exec(sql_query,params={'category': category_id,'start_date': start_date,'end_date': end_date})).mappings().all()
+
+    data = [dict(row) for row in results]
+    catagory_name = data[0].pop('name') if data else None
+
+    response_data = {
+        'category_name' : catagory_name,
+        'game_list': data
+    }
+
+
+    return response_data
+    

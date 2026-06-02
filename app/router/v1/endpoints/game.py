@@ -1,4 +1,5 @@
 from fastapi import APIRouter,Depends,HTTPException,status, Query, Request, BackgroundTasks
+from httpcore import AnyIOBackend
 
 from app.utils.stripe import Stripe
 from ....schema.game import GameResponse,GameCreate,GameCatagoryResponse,GameDelete,GameUpdate,CatagoryResponse,BuyGameRequest
@@ -136,8 +137,26 @@ async def update_game(
 
 
 @router.get('/catagory', response_model=ResponseTemplate[list[CatagoryResponse]])
-async def get_catagory(db: DbSession, current_user : Annotated[str,Depends(RequirePermission(['customer','admin','owner']))]):
+async def get_catagory(
+    db: DbSession, 
+    current_user : Annotated[str,Depends(RequirePermission(['customer','admin','owner']))],
+    cache: Annotated[redis.Redis, Depends(get_redis)]
+    ):
+
+    cache_key = "catagory:all"
+
+    cache_data = await cache.get(cache_key)
+    if cache_data:
+        data = json.loads(cache_data)
+        print('='*300)
+        print(data)
+        print('='*300)
+        return ResponseTemplateConstructor('200','OK','Get catagory Successfully', data)
+
     results = await crud_game.get_catagory(db)
+    dict_data = [dict(i) for i in results]
+    await cache.set(cache_key,json.dumps(dict_data), ex=1000)
+    
     return ResponseTemplateConstructor('200','OK','Get catagory Successfully', results)
 
 

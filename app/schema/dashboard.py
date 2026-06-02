@@ -1,4 +1,9 @@
+from typing import List
+
 from pydantic import BaseModel
+from enum import Enum
+
+from app.crud import game
 
 
 class Header(BaseModel):
@@ -12,6 +17,14 @@ class DonutChart(BaseModel):
     income : int
     avg : str
 
+class GameList(BaseModel):
+    game_name : str | None = None
+    count_order : int | None = None
+
+class DonutChartByCategory(BaseModel):
+    category_name : str | None = None
+    game_list : List[GameList]
+
 class BarChart(BaseModel):
     username : str
     total_spending : int
@@ -20,3 +33,15 @@ class BarChart(BaseModel):
 class TrendlineChart(BaseModel):
     date : str
     income : int
+    
+
+class ResponseTrendLineChart(BaseModel):
+    trend_data : List[TrendlineChart]
+    mode : str
+
+
+class TimeMode(str,Enum):
+    day = "day"
+    week = "week"
+    month = "month"
+    year = "year"

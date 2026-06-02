@@ -6,7 +6,7 @@ from pathlib import Path
 from pydantic import BaseModel, EmailStr
 from app.schema.email import SendEmail
 from fastapi import BackgroundTasks
-
+from datetime import date
 
 load_dotenv()
 
@@ -30,6 +30,7 @@ conf = ConnectionConfig(
 
 
 async def send_email(body : SendEmail, background_tasks : BackgroundTasks):
+    current_date = date.today()
     message = MessageSchema(
         subject= "Order Confirmation",
         recipients=[body.email],
@@ -37,7 +38,8 @@ async def send_email(body : SendEmail, background_tasks : BackgroundTasks):
             "customer_name" : body.customer_name,
             "order_id" : body.order_id,
             "game" : body.game,
-            "price" : body.price
+            "price" : body.price,
+            "current_date": current_date
         },
         subtype=MessageType.html
     )

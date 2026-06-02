@@ -39,8 +39,8 @@ async def test_get_image(db: AsyncSession):
 async def delete_image(db: AsyncSession,image_id : list[int]):
 
     #Delete from folder
-    fetch_query = text('SELECT id,image FROM image WHERE id IN :id')
-    results = await db.exec(fetch_query, params={'id': tuple(image_id)}).mappings().all()
+    fetch_query = text('SELECT id,image FROM image WHERE id = ANY(:id)')
+    results = (await db.exec(fetch_query, params={'id': tuple(image_id)})).mappings().all()
 
     if not results:
         raise HTTPException(status_code=400,detail='Not found Image')
@@ -58,7 +58,7 @@ async def delete_image(db: AsyncSession,image_id : list[int]):
 
 
     #Delete from database
-    sql_query = text('DELETE FROM image WHERE id IN :id')
+    sql_query = text('DELETE FROM image WHERE id = ANY(:id)')
     result = await db.exec(sql_query,params={'id': tuple(image_id)})
     if result.rowcount == 0:
         raise HTTPException(status_code=400,detail='Not found Image')

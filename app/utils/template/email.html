@@ -3,11 +3,56 @@
     <meta charset="utf-8">
 </head>
 <body>
-<div style="font-size: small; font-family: Arial, Helvetica, sans-serif;">
+<!-- <div style="font-size: small; font-family: Arial, Helvetica, sans-serif;">
     <h2 style="font-size: xx-large;">Your order has been confirm!</h2>
     <p>dear : {{customer_name}}</p>
     <p>Order ID : {{order_id}}</p>
     <p>Game : {{game}}</p>
     <p>price : {{price}}</p>
+</div> -->
+
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333333; line-height: 1.6;">
+    
+    <h2 style="color: #2c3e50;">Order Confirmed!</h2>
+    
+    <p>Hi <strong>{{ customer_name }}</strong>,</p>
+    
+    <p>Your order has been successfully processed. Thank you for your purchase! The game is now ready and has been added to your account.</p>
+    
+    <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
+        <p style="margin: 0 0 10px 0;"><strong>Order ID:</strong> #{{ order_id }}</p>
+        <p style="margin: 0;"><strong>Date:</strong> {{ current_date }}</p>
+    </div>
+
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="border-bottom: 2px solid #dddddd;">
+            <th style="text-align: left; padding: 10px 0;">Item</th>
+            <th style="text-align: right; padding: 10px 0;">Price</th>
+        </tr>
+        <tr>
+            <td style="padding: 15px 0; border-bottom: 1px solid #eeeeee;">
+                <strong>{{ game}}</strong>
+            </td>
+            <td style="text-align: right; padding: 15px 0; border-bottom: 1px solid #eeeeee;">
+                ${{ price }}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 15px 0; text-align: right;"><strong>Total:</strong></td>
+            <td style="text-align: right; padding: 15px 0;"><strong>${{ price }}</strong></td>
+        </tr>
+    </table>
+
+    <div style="text-align: center; margin: 30px 0;">
+        <a href="http://192.168.1.95:4200/library" style="background-color: #007bff; color: #ffffff; padding: 12px 25px; text-decoration: none; border-radius: 4px; font-weight: bold;">View in Library</a>
+    </div>
+
+    <hr style="border: none; border-top: 1px solid #eeeeee; margin: 20px 0;">
+    
+    <p style="font-size: 12px; color: #777777; text-align: center;">
+        If you have any questions or need support, simply reply to this email.<br>
+        &copy; 2026 Nova Store. All rights reserved.
+    </p>
+
 </div>
 </body>

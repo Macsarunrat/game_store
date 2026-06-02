@@ -85,11 +85,11 @@ async def create_game(db: AsyncSession, game_name: str, description: str, price 
             'VALUES (:name,:description,:price)' \
             'RETURNING id'
             )
-        result_game_id = await db.exec(insert_game_query,params={
+        result_game_id = (await db.exec(insert_game_query,params={
             'name': game_name,
             'description': description,
             'price': price,
-        }).scalars().first()
+        })).scalars().first()
         print(f"new game id {result_game_id}")
 
 
@@ -134,21 +134,23 @@ async def update_game(db: AsyncSession,game_name: str | None, description :str |
 
 
     print(f'+++++++++++++++++++++++{request_body}+++++++++++++++++++++++')
+    if request_body:
+        sql_column = ', '.join([f'{key} = :{key}' for key in request_body.keys()])
+        print(f'+++++++++++++++++++++++{sql_column}+++++++++++++++++++++++')
 
-    sql_column = ', '.join([f'{key} = :{key}' for key in request_body.keys()])
-    print(f'+++++++++++++++++++++++{sql_column}+++++++++++++++++++++++')
+        sql_query = text(f'UPDATE game SET {sql_column} WHERE id = :id')
+        request_body['id'] = game_id
 
-    sql_query = text(f'UPDATE game SET {sql_column} WHERE id = :id')
-
-    await db.exec(sql_query,params={'name': game_name,'description': description,'price': price,'id':game_id})
+        await db.exec(sql_query,params=request_body)
 
     if catagory is not None :
         delete_previous_catagory = text('DELETE FROM game_catagory WHERE game_id = :id')
         await db.exec(delete_previous_catagory,params={'id':game_id})
 
-        create_game_catagory = text('INSERT INTO game_catagory (game_id,catagory_id)VALUES (:game_id, :catagory_id) ')
-        for catagory_id in catagory:
-            await db.exec(create_game_catagory,params={'game_id':game_id,'catagory_id': catagory_id})
+        if catagory:
+            create_game_catagory = text('INSERT INTO game_catagory (game_id,catagory_id) VALUES (:game_id, :catagory_id) ')
+            for catagory_id in catagory:
+                await db.exec(create_game_catagory,params={'game_id':game_id,'catagory_id': catagory_id})
         
     await db.commit()
 

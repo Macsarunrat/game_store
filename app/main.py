@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from app.core.database import create_db_and_tb
 from app.router.v1.api import api_v1_router
+from app.router.v2.api import api_v2_router
 from .schema.template import ResponseTemplateConstructor
 import shutil
 from pathlib import Path
@@ -11,7 +12,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import redis.asyncio as redis
 import os
 import asyncio
+import traceback
 from app.core.websocket import global_event_listener
+import logging
 
 from app.router.v1.endpoints import stripe
 
@@ -52,6 +55,7 @@ app = FastAPI(lifespan=lifespan,title="Game Shop",version='1.0.0')
 
 
 app.include_router(api_v1_router)
+app.include_router(api_v2_router)
 
 app.mount('/static',StaticFiles(directory="upload"),'upload')
 
@@ -70,6 +74,21 @@ def handle_exception(request: Request,error:HTTPException):
         status_code=error.status_code,
         content=error_content.__dict__
         )
+
+@app.exception_handler(Exception)
+def global_exception_handler(request: Request, error: Exception):
+
+    logging.error(f'Unhandle Error : {str(error)}\n{traceback.format_exc()}')
+    error_content = ResponseTemplateConstructor(
+        status_code=500,
+        status="error",
+        message="Internal Server Error : ระบบขัดข้องชั่วคราว",
+        detail=None
+    )
+    return JSONResponse(
+        status_code=500,
+        content=error_content.__dict__
+    )
 
 
 origins = [

@@ -4,9 +4,9 @@ from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from dns.ttl import make
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from sqlmodel import desc
-from app.dependencies import DbSession
+from app.dependencies import DbSession,RequirePermission
 from ....schema.dashboard import DonutChartByCategory,TimeMode
 from app.crud import dashboard as crud_dashboard
 from app.schema.template import ResponseTemplate,ResponseTemplateConstructor
@@ -21,7 +21,10 @@ router = APIRouter(
 
 
 @router.get('/chart/donut', response_model=ResponseTemplate[DonutChartByCategory])
-async def get_donut_chart(db: DbSession,category_id:int ,mode: Annotated[TimeMode,Query(description='Select dropdown')] = TimeMode.day):
+async def get_donut_chart(
+    db: DbSession,category_id:int ,
+    currrent_user : Annotated[str, Depends(RequirePermission(['owner']))],
+    mode: Annotated[TimeMode,Query(description='Select dropdown')] = TimeMode.day):
     
     tz_bkk = ZoneInfo('Asia/Bangkok')
     now_bkk = datetime.now(tz_bkk)
@@ -39,7 +42,7 @@ async def get_donut_chart(db: DbSession,category_id:int ,mode: Annotated[TimeMod
         start_date = make_dt(date(today_date.year,today_date.month,1))
         end_date = make_dt(today_date,is_end=True)
     elif mode == TimeMode.week:
-        start_date = make_dt(today_date - timedelta(days=6))
+        start_date = make_dt(today_date - timedelta(today_date.weekday()))
         end_date = make_dt(today_date,is_end=True)
     else :
         start_date = make_dt(today_date)

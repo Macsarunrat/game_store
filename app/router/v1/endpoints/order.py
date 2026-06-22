@@ -7,6 +7,7 @@ from ....crud import game as crud_game
 from ....schema.template import ResponseTemplate, ResponseTemplateConstructor
 from ....schema.order import OrderResponse
 from typing import Annotated
+from app.schema.game import GameStripe
 from fastapi.sse import ServerSentEvent, EventSourceResponse
 from collections.abc import AsyncIterable
 from fastapi.encoders import jsonable_encoder
@@ -17,6 +18,7 @@ from app.utils.channel import new_order_channel, confirm_ordered
 from app.schema.email import SendEmail
 from app.utils.email import send_email
 from app.utils.stripe import Stripe
+from datetime import datetime, timezone
 
 router = APIRouter(
     prefix='/order',
@@ -107,7 +109,14 @@ async def ordered_notification(request: Request,db: DbSession, redis_client: Ann
                 customer = result['username']
                 game_name = result['name']
                 price = result['price']
-                time = result['date']
+                utc_time = result['date']
+                if isinstance(utc_time,datetime):
+                    if utc_time.tzinfo is None:
+                        utc_time = utc_time.replace(tzinfo=timezone.utc)
+                    time = utc_time.astimezone()
+                else :
+                    time = utc_time
+
 
                 message = {'customer':customer,'game': game_name,'price':price,'time':time}
                 yield ServerSentEvent(data=message,retry=5000,event='new_order')
@@ -161,7 +170,7 @@ async def order_confirm_successfully(db: DbSession, request: Request, redis_clie
         await pubsub.close()
 
     
-@router.post('/pay-again',response_model=ResponseTemplate[dict])
+@router.post('/pay-again',response_model=ResponseTemplate[GameStripe])
 async def customer_pay_again(db: DbSession, order_id: int, current_user : Annotated[str,Depends(get_user)]):
     """
     For customer pay again

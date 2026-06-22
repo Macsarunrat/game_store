@@ -2,7 +2,7 @@ from fastapi import APIRouter,Depends,HTTPException,status, Query, Request, Back
 from httpcore import AnyIOBackend
 
 from app.utils.stripe import Stripe
-from ....schema.game import GameResponse,GameCreate,GameCatagoryResponse,GameDelete,GameUpdate,CatagoryResponse,BuyGameRequest
+from ....schema.game import GameResponse,GameCreate,GameCatagoryResponse,GameDelete,GameUpdate,CatagoryResponse,BuyGameRequest, GameStripe, GameHiddenRequest
 from ....schema.template import ResponseTemplate,ResponseTemplateConstructor
 from ....dependencies import DbSession,RequirePermission,get_user, get_redis
 from ....crud import game as crud_game
@@ -161,7 +161,7 @@ async def get_catagory(
 
 
 
-@router.post('/buy',response_model=ResponseTemplate[Any])
+@router.post('/buy',response_model=ResponseTemplate[GameStripe])
 async def buy_game(db: DbSession, 
                    body : BuyGameRequest, 
                    current_user : Annotated[str, Depends(RequirePermission(['customer']))], 
@@ -245,3 +245,13 @@ async def check_diff(new_data : dict, old_data: dict):
     except Exception as e:
         raise HTTPException(status_code=400, detail=f'Error check diff {e}')
     
+@router.put('/hidden',response_model = ResponseTemplate[str])
+async def hidden_game(db:DbSession , body:GameHiddenRequest, cache : Annotated[redis.Redis, Depends(get_redis)], current_user : Annotated[str,Depends(RequirePermission(['owner','admin']))]):
+    game_id = body.game_id
+    status = body.is_hidden
+    await cache.delete("game:all:")
+    if game_id :
+        await crud_game.update_game_status(db,game_id,status)
+        print('CLEAR CACHE')
+        return ResponseTemplateConstructor(200,'OK','Update Hidden Status Successfully',None)
+        

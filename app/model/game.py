@@ -12,6 +12,7 @@ class Game(SQLModel,table=True):
     price : int
     catagory : list["Catagory"] = Relationship(back_populates="game", link_model=Game_catagory)
     is_active : bool = Field(default=True,sa_column_kwargs={'server_default': "true"})
+    is_hidden : bool = Field(default=False,sa_column_kwargs={'server_default' : "false"})
 
 
 class Catagory(SQLModel,table=True):

@@ -1,14 +1,19 @@
+from xxlimited import Str
+
 from pydantic import BaseModel
 from .images import Images
+from enum import Enum
 
 
 class GameBase(BaseModel):
     name : str
     description : str
     price : int
+    
     catagories : list[str | None] | None = None
 
 class GameResponse(GameBase):
+    is_hidden : bool
     game_id : int
     images : list[Images]
 
@@ -40,3 +45,21 @@ class GameUpdate(BaseModel):
 
 class BuyGameRequest(BaseModel):
     game_id : int
+
+
+
+class GameStripe(BaseModel):
+    order_id : int
+    checkout: str
+    mode : str
+
+class GameHiddenStatus(str,Enum):
+    hide = True
+    show = False
+
+class GameHiddenRequest(BaseModel):
+    game_id : int
+    is_hidden : bool
+
+
+    

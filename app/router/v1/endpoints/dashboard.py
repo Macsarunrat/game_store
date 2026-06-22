@@ -64,7 +64,7 @@ async def get_trendline_chart(db: DbSession, current_user : Annotated[str,Depend
         start_date = make_dt(date(today_date.year,today_date.month,1))
         end_date = make_dt(today_date,is_end=True)
     elif mode == TimeMode.week:
-        start_date = make_dt(today_date - timedelta(days=6))
+        start_date = make_dt(today_date - timedelta(today_date.weekday()))
         end_date = make_dt(today_date,is_end=True)
     else :
         step = timedelta(hours=1)

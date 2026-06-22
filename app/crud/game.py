@@ -1,3 +1,5 @@
+from pydantic.version import parse_mypy_version
+from sqlalchemy import AsyncAdaptedQueuePool
 from sqlmodel import Session, text
 import os
 from fastapi import HTTPException
@@ -7,7 +9,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 
 async def get_all_game(db: AsyncSession):
-    sql_query = text('SELECT g.id as "game_id", g.name, g.description, g.price, c.name as "catagory" ' \
+    sql_query = text('SELECT g.id as "game_id", g.name, g.description, g.price, c.name as "catagory" ,g.is_hidden ' \
     'FROM game g ' \
     'LEFT JOIN game_catagory gc ON g.id = gc.game_id ' \
     'LEFT JOIN catagory c ON gc.catagory_id = c.id ' \
@@ -204,3 +206,16 @@ async def get_game_by_id(db: AsyncSession, game_id : int):
     )
     result = (await db.exec(sql_query,params={'game_id':game_id})).mappings().first()
     return result
+
+
+async def update_game_status(db: AsyncSession,game_id : int, status : bool):
+    update_query = text(
+        """
+        UPDATE game
+        SET is_hidden = :status
+        WHERE id = :id
+
+        """
+    )
+    await db.exec(update_query,params={'id': game_id,'status':status})
+    await db.commit()

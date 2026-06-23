@@ -1,0 +1,55 @@
+.area-chart-container,
+:host {
+  display: block;
+  height: 100%;
+  min-width: 0;
+}
+
+.area-chart-container {
+  border-radius: 8px;
+  overflow: hidden; /* Prevent default browser scrollbars */
+  background: var(--nova-primary);
+  padding: 0.85rem 0.75rem 0.35rem 0.75rem;
+  box-sizing: border-box;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--nova-overlay-glass);
+  height: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.area-chart-container:hover {
+  border-color: rgba(76, 201, 240, 0.3);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.area-chart-container apx-chart {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+:host ::ng-deep .area-chart-container .apexcharts-tooltip {
+  pointer-events: none;
+}
+
+:host ::ng-deep .area-chart-tooltip {
+  background: var(--nova-primary);
+  border: 1px solid var(--nova-info-swal);
+  border-radius: 6px;
+  color: var(--nova-text-on-dark);
+  font-family: inherit;
+  padding: 0.45rem 0.65rem;
+  text-align: left;
+}
+
+:host ::ng-deep .area-chart-tooltip__date {
+  color: var(--nova-chart-label);
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
+}
+
+:host ::ng-deep .area-chart-tooltip__value {
+  color: var(--nova-accent);
+  font-size: 1rem;
+  font-weight: 700;
+}

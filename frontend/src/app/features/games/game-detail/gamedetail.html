@@ -1,0 +1,74 @@
+<div class="all-container">
+  <div>
+    <div mat-card-avatar class="icon-game-container">
+      <div class="icon-game">
+        @if (gameImageMain) {
+          <img [src]="gameImageMain | staticUrl" width="200px" height="100px" />
+        } @else {
+          <div class="empty-image-icon">
+            <p>No Image</p>
+          </div>
+        }
+      </div>
+
+      <div class="game-name-container">
+        <label class="game-name">{{ gameDetail.name }}</label>
+
+        <div class="cate-show">
+          <label>หมวดหมู่</label>
+          @for (cate of gameDetail.catagories; track $index) {
+            <button matButton>{{ cate }}</button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slider-wrapper">
+    <button class="slide-btn prev" (click)="scrollLeft(slider)">&#10094;</button>
+
+    <div class="image-slider" #slider>
+      @for (media of gameVideo; track $index) {
+        <div class="slide-item">
+          <video controls autoplay muted>
+            <source [src]="media.image | staticUrl" type="video/mp4" />
+          </video>
+        </div>
+      }
+
+      @for (pic of gameImage; track pic.image_id) {
+        <div class="slide-item">
+          <img [src]="pic.image | staticUrl" alt="Game Image" />
+        </div>
+      }
+
+      @if (gameVideo.length === 0 && gameImage.length === 0) {
+        <div class="slide-item empty-image-slide-container">
+          <p>No Image</p>
+        </div>
+      }
+    </div>
+
+    <button class="slide-btn next" (click)="scrollRight(slider)">&#10095;</button>
+  </div>
+
+  <div>
+    <p>{{ gameDetail.description }}</p>
+  </div>
+  <div class="buy-item-container">
+    <button
+      matButton
+      class="buy-item"
+      (click)="buyGame()"
+      [class.owned]="isGameOwned(gameDetail.game_id)"
+      [disabled]="isGameOwned(gameDetail.game_id) || isgameBuy "
+    >
+      {{
+        isGameOwned(gameDetail.game_id)
+          ? 'Owned'
+          : gameDetail.price == '0'
+            ? 'Get Free'
+            : gameDetail.price + ' ฿'
+      }}
+    </button>
+  </div>
+</div>

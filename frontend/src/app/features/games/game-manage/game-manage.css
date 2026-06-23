@@ -1,0 +1,577 @@
+.game-manage-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--nova-gradient-page) !important;
+  color: var(--nova-text-on-dark);
+  box-sizing: border-box;
+}
+
+.game-manage-container.dashboard-mode {
+  min-height: 100dvh;
+}
+
+/* Sidebar Wrapper for Owner (Desktop view) */
+.sidebar-wrapper {
+  width: 260px;
+  min-width: 260px;
+  background: var(--nova-gradient-sidebar-vertical);
+  backdrop-filter: blur(15px);
+  border-right: 1px solid var(--nova-border-panel);
+  display: flex;
+  flex-direction: column;
+  padding: 80px 1rem 2rem 1rem; /* Added margin for top navbar */
+  box-sizing: border-box;
+  z-index: 10;
+  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-mode .sidebar-wrapper {
+  padding-top: 80px;
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2.5rem;
+  color: var(--nova-accent);
+  padding: 0 0.5rem;
+  border-bottom: 1px dashed var(--nova-border-subtle);
+  padding-bottom: 1rem;
+}
+
+.sidebar-header .admin-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: var(--nova-accent);
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.nav-item:hover {
+  background: var(--nova-overlay-glass);
+  color: var(--nova-text-on-dark);
+}
+
+.nav-item.active {
+  background: var(--nova-primary);
+  color: var(--nova-accent);
+  border-left: 4px solid var(--nova-accent);
+  border-radius: 0 8px 8px 0;
+  padding-left: 0.75rem;
+  box-shadow: 0 4px 15px rgba(20, 19, 93, 0.5);
+  font-weight: 600;
+}
+
+/* 📱 Mobile Nav Bar (Hidden by default, displayed on mobile screen) */
+.mobile-nav-bar {
+  display: none;
+}
+
+/* 💻 Main Content Panel */
+.main-content-panel {
+  flex: 1;
+  padding: 2rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.dashboard-mode .main-content-panel {
+  padding: 4.5rem 1.25rem 1rem;
+  gap: 1rem;
+}
+
+.main-content-panel.full-width {
+  width: 100%;
+}
+
+.page-header {
+  flex-shrink: 0;
+  margin-top: 4rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--nova-text-on-dark);
+  margin: 0 0 0.25rem 0;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.navbar-search-content {
+  display: flex;
+  min-width: 0px;
+  max-width: 300px;
+  height: 2.5rem;
+  align-self: center;
+  align-items: center;
+  background: var(--nova-overlay-glass) !important;
+  padding: 0 2rem;
+  border-radius: 2rem;
+}
+
+.navbar-search-input {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: white;
+  outline: none;
+}
+
+.navbar-search-icon {
+  display: flex;
+  color: white;
+  text-align: center;
+}
+
+.btn-create {
+  background: var(--nova-accent) !important;
+  color: var(--nova-bg-deep) !important;
+  font-weight: 600 !important;
+  height: 40px !important;
+  border-radius: 8px !important;
+  padding: 0 1.25rem !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 15px var(--nova-accent-bg-soft-hover);
+}
+
+.btn-create:hover {
+  background: var(--nova-accent-hover) !important;
+  box-shadow: 0 6px 20px rgba(245, 168, 0, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+/* 📊 Glassmorphic Table Card */
+.table-card {
+  background: var(--nova-overlay-glass) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid var(--nova-border-subtle);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+.catalog-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.catalog-table th,
+.catalog-table td {
+  padding: 1.25rem 1.5rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--nova-overlay-glass) !important;
+}
+
+.catalog-table th {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  color: var(--nova-info) !important;
+  font-weight: 600;
+  border-bottom: 1px solid var(--nova-border-subtle) !important;
+  background: var(--nova-surface-raised) !important;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.catalog-table tbody tr {
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+
+.catalog-table tbody tr:hover {
+  background: var(--nova-overlay-glass) !important;
+}
+
+/* 🖼️ Cover Image Column */
+.cover-image-wrapper {
+  position: relative;
+  width: 110px;
+  height: 62px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--nova-overlay-glass);
+  border: 1px solid var(--nova-border-subtle);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-placeholder mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.cover-hover-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(20, 19, 93, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.cover-hover-overlay mat-icon {
+  color: var(--nova-accent);
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.cover-image-wrapper:hover .cover-hover-overlay {
+  opacity: 1;
+}
+
+.cover-image-wrapper:hover {
+  transform: scale(1.05);
+  border-color: var(--nova-accent);
+  box-shadow: 0 0 10px rgba(245, 168, 0, 0.3);
+}
+
+/* 🎮 Game Cell Content */
+.game-cell-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/* 📝 Title Cell */
+.title-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.game-name-text {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--nova-text-muted);
+}
+
+.game-id-text {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/*  Categories & Prices */
+.category-text {
+  color: var(--nova-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+.price-text {
+  color: var(--nova-success-soft);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/*  Status Badges */
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.7rem;
+  border-radius: 25px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+.status-active {
+  background: rgba(76, 201, 240, 0.15);
+  color: var(--nova-success);
+}
+
+.status-offline {
+  background: rgba(255, 122, 144, 0.15);
+  color: var(--nova-danger-dark);
+}
+
+/* ⚙️ Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-edit {
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: var(--nova-text-muted) !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  font-size: 0.85rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-edit:hover {
+  border-color: var(--nova-success-dark) !important;
+  color: var(--nova-success-dark) !important;
+  background: rgba(76, 201, 240, 0.05) !important;
+}
+
+.btn-delete {
+  border: 1px solid rgba(255, 122, 144, 0.3) !important;
+  color: var(--nova-danger-dark) !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  font-size: 0.85rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-delete:hover {
+  background: rgba(255, 122, 144, 0.1) !important;
+  border-color: var(--nova-danger-dark) !important;
+  box-shadow: 0 0 10px rgba(255, 122, 144, 0.1) !important;
+}
+
+/* 📭 Empty Table State */
+.empty-table-row {
+  text-align: center;
+  padding: 4rem 1.5rem !important;
+}
+
+.empty-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: var(--nova-text-subtle);
+  margin-bottom: 0.5rem;
+}
+
+.empty-table-row p {
+  color: var(--nova-text-faint);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.table-footer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.35rem 1rem;
+  background: rgba(22, 23, 91, 0.5);
+  border-top: 1px solid var(--nova-border-subtle);
+}
+
+.table-count {
+  color: var(--nova-text-placeholder);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.paginator-container {
+  background: transparent;
+  color: var(--nova-text-on-dark);
+  margin-left: auto;
+}
+
+:host ::ng-deep .table-footer .paginator-container .mat-mdc-icon-button svg {
+  fill: var(--nova-text-on-dark) !important;
+}
+
+:host ::ng-deep .table-footer .paginator-container .mat-mdc-paginator-range-label,
+:host ::ng-deep .table-footer .paginator-container .mat-mdc-select-value,
+:host ::ng-deep .table-footer .paginator-container .mat-mdc-select-arrow {
+  color: var(--nova-text-on-dark) !important;
+}
+
+.dashboard-wrapper {
+  margin-top: 0;
+  min-height: 0;
+}
+
+/* 📱 Responsive Styles for Tablet & Mobile Screen */
+@media (max-width: 768px) {
+  .game-manage-container {
+    flex-direction: column;
+  }
+
+  /* Hide Desktop Sidebar */
+  .sidebar-wrapper {
+    display: none;
+  }
+
+  /* Show Mobile Menu Bar */
+  .mobile-nav-bar {
+    display: flex;
+    width: 100%;
+    background: var(--nova-primary);
+    border-bottom: 1px solid var(--nova-overlay-glass);
+    margin-top: 64px;
+    position: fixed;
+    z-index: 99;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0.6rem 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-nav-item mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--nova-accent);
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 3px solid var(--nova-accent);
+    font-weight: 600;
+  }
+
+  /* Adjust Main Padding on mobile viewports */
+  .main-content-panel {
+    padding: 1.25rem !important;
+    gap: 1.5rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 3.5rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    gap: 0.75rem;
+  }
+
+  .navbar-search-content {
+    width: 100%;
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  .btn-create {
+    width: 100%;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+
+  .table-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .table-count,
+  .paginator-container {
+    margin: 0 auto;
+  }
+
+  .catalog-table th,
+  .catalog-table td {
+    padding: 1rem 0.75rem;
+  }
+
+  .game-name-text {
+    font-size: 0.95rem;
+  }
+
+  .cover-image-wrapper {
+    width: 80px;
+    height: 45px;
+  }
+
+  .price-text {
+    font-size: 1rem;
+  }
+}

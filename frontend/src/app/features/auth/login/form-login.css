@@ -1,0 +1,134 @@
+.form-Container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  overflow: hidden;
+  max-height: 100vh;
+  max-width: 100vw;
+}
+
+.form-img-content {
+  max-width: 50vw;
+  height: 100%;
+  border-radius: 0;
+}
+
+.form-main-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+.form-main-content {
+  display: flex;
+  flex-direction: column;
+  width: 400px;
+  max-width: 500px;
+  margin: 0px auto;
+  padding: 100px;
+}
+
+.form-main-content h2 {
+  text-align: center;
+}
+
+.form-main-icon {
+  align-items: center;
+  max-width: 150px;
+  margin: 0 auto;
+}
+
+.form-main-icon img {
+  border-radius: 10px;
+}
+
+.form-main-label {
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.form-main-user-icon {
+}
+
+.form-main-error-wrapper {
+  min-height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-main-mat-error {
+  display: flex;
+  margin-top: 0.5rem;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-main-error-icon {
+  font-size: 15px;
+  height: 15px;
+  width: 15px;
+}
+
+.register-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.register-label {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.register-btn {
+  width: 100%;
+  border: 0.5px solid rgba(0, 0, 0, 0.5) !important;
+  border-radius: 5px !important;
+}
+
+input::placeholder {
+  color: var(--nova-text-placeholder) !important;
+  opacity: 1;
+}
+
+.placeholder {
+  color: darkgray;
+}
+
+/* 📱 Responsive Styles for Mobile & Tablet */
+@media (max-width: 768px) {
+  .form-Container {
+    grid-template-columns: 1fr; /* ปรับการ์ดแสดงผลเรียงเป็นแถวเดี่ยวแนวตั้ง */
+    max-height: none;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .form-img-content {
+    display: none; /* ซ่อนรูปภาพบานใหญ่ออกบนมือถือ */
+  }
+
+  .form-main-container {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .form-main-content {
+    width: 100%;
+    max-width: 100%;
+    padding: 3rem 1.5rem; /* ปรับลด Padding จาก 100px เหลือระยะห่างที่พอดี */
+    box-sizing: border-box;
+  }
+
+  .form-main-icon {
+    max-width: 100px; /* ลดขนาดโลโก้ในฟอร์มของมือถือ */
+  }
+}
+
+
+.placeholder {
+  color: darkgray;
+}

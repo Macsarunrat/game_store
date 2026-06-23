@@ -1,0 +1,34 @@
+<div>
+  <div>
+    <div mat-card-avatar class="icon-game-container">
+      <div class="icon-game">
+        @if (gameImageMain) {
+          <img [src]="gameImageMain | staticUrl" width="200px" height="100px" />
+        } @else {
+          <div class="empty-image-icon">
+            <p>No Image</p>
+          </div>
+        }
+      </div>
+      <div class="game-name-container">
+        <label class="game-name">{{ gameDetail.name }}</label>
+
+        <div class="cate-show">
+          <label>หมวดหมู่</label>
+          @for (cate of gameDetail.catagories; track $index) {
+            <button matButton>{{ cate }}</button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-game-media [game_id]="gameDetail.game_id"></app-game-media>
+
+  <div>
+    <p>{{ gameDetail.description }}</p>
+  </div>
+  <div class="buy-item-container">
+    <button matButton class="buy-item" (click)="updateForm()">Update</button>
+  </div>
+</div>

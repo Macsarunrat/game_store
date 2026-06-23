@@ -1,0 +1,105 @@
+<form
+  class="register-container"
+  [formGroup]="registerField"
+  (ngSubmit)="toRegister(registerField.value)"
+>
+  <h2 class="register-title">Register</h2>
+
+  <div class="inline-field-container">
+    <div class="inline-field-content">
+      <label class="form-main-label">First Name</label>
+      <mat-form-field appearance="outline" hideRequiredMarker="true">
+        <mat-label>jakrit *</mat-label>
+        <input matInput formControlName="firstName" [errorStateMatcher]="matcher" />
+        @if (registerField.get('firstName')?.hasError('required')) {
+          <mat-error>this field is required</mat-error>
+        }
+
+        <mat-icon matSuffix>badge </mat-icon>
+      </mat-form-field>
+    </div>
+
+    <div class="inline-field-content">
+      <label class="form-main-label">Surname </label>
+      <mat-form-field appearance="outline" hideRequiredMarker="true">
+        <mat-label>bonkaton *</mat-label>
+        <input matInput formControlName="surName" [errorStateMatcher]="matcher" />
+        @if (registerField.get('surName')?.hasError('required')) {
+          <mat-error>this field is required </mat-error>
+        }
+
+        <mat-icon matSuffix>badge</mat-icon>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <div class="block-field-content">
+    <label class="form-main-label">Username</label>
+    <mat-form-field appearance="outline" hideRequiredMarker="true">
+      <mat-label>Ex Jacky *</mat-label>
+
+      <input matInput formControlName="userName" [errorStateMatcher]="matcher" />
+      @if (registerField.get('userName')?.hasError('required')) {
+        <mat-error>this field is required</mat-error>
+      }
+      @if (registerField.get('userName')?.hasError('minlength')) {
+        <mat-error>required at least 4 characters </mat-error>
+      }
+
+      <mat-icon matSuffix>person</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <div class="block-field-content">
+    <label class="form-main-label">Password</label>
+    <mat-form-field appearance="outline" hideRequiredMarker="true">
+      <mat-label>************* *</mat-label>
+      <input
+        matInput
+        [type]="hidePassWord ? 'password' : 'text'"
+        formControlName="passWord"
+        [errorStateMatcher]="matcher"
+      />
+      @if (registerField.get('passWord')?.hasError('required')) {
+        <mat-error>this field is required</mat-error>
+      }
+      @if (registerField.get('passWord')?.hasError('minLength')) {
+        <mat-error>required at least 8 characters </mat-error>
+      }
+      @if (registerField.get('passWord')?.hasError('noUpperCase')) {
+        <mat-error>required at least 1 uppercase </mat-error>
+      }
+      @if (registerField.get('passWord')?.hasError('noSpecialChar')) {
+        <mat-error>required at least 1 specialchar </mat-error>
+      }
+      <mat-icon matSuffix (click)="visible(); $event.preventDefault(); $event.stopPropagation()">{{
+        hidePassWord ? 'visibility_off' : 'visibility'
+      }}</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <div class="block-field-content">
+    <label class="form-main-label">Email</label>
+    <mat-form-field appearance="outline" hideRequiredMarker="true">
+      <mat-label>example@email.com *</mat-label>
+      <input
+        matInput
+        #userEmail
+        type="email"
+        formControlName="email"
+        [errorStateMatcher]="matcher"
+      />
+      @if (registerField.get('email')?.hasError('email')) {
+        <mat-error>invalid email format (example: user@email.com)</mat-error>
+      }
+      @if (registerField.get('email')?.hasError('required')) {
+        <mat-error>this field is required</mat-error>
+      }
+      <mat-icon matSuffix>email</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <button matButton="filled" class="register-btn" [disabled]="registerField.invalid">
+    Register
+  </button>
+</form>

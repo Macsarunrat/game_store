@@ -1,0 +1,112 @@
+<div [class.media-dialog-layout]="isDialog">
+  <!-- Dialog Header (Only visible if opened as dialog) -->
+  @if (isDialog) {
+    <div class="media-dialog-header">
+      <div class="header-left-content">
+        <div class="header-icon-badge">
+          <mat-icon>perm_media</mat-icon>
+        </div>
+        <div class="header-titles">
+          <span class="eyebrow-text">NOVA STORE</span>
+          <h2 class="dialog-title-text">จัดการสื่อของเกม (Media Gallery)</h2>
+          <p class="dialog-desc-text">
+            เกม: <strong>{{ gameDetail?.name || 'กำลังโหลด...' }}</strong> (ID: {{ game_id }})
+          </p>
+        </div>
+      </div>
+      <button mat-icon-button class="btn-close-dialog" [mat-dialog-close]="true">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+
+  <!-- Media Controls (Buttons to Add/Delete) -->
+  <div class="media-controls-row">
+    <button mat-flat-button (click)="formDialog()" class="btn-media-add">
+      <mat-icon>add_photo_alternate</mat-icon>
+      <span>เพิ่มภาพ / วิดีโอ</span>
+    </button>
+
+    <button
+      mat-flat-button
+      (click)="imgDelete()"
+      [class.btn-media-cancel]="isDelete"
+      [class.btn-media-delete]="!isDelete"
+    >
+      <mat-icon>{{ isDelete ? 'close' : 'delete' }}</mat-icon>
+      <span>{{ isDelete ? 'ยกเลิก' : 'ลบไฟล์สื่อ' }}</span>
+    </button>
+
+    @if (isDelete) {
+      <button
+        mat-flat-button
+        class="btn-media-confirm"
+        (click)="dialogDel()"
+        [disabled]="selectedImg.length === 0"
+      >
+        <mat-icon>check</mat-icon>
+        <span>ยืนยันลบ (เลือก {{ selectedImg.length }} รายการ)</span>
+      </button>
+    }
+  </div>
+
+  <!-- Media Slider / List -->
+  <div class="media-gallery-section">
+    <div class="slider-wrapper">
+      <button class="slide-btn prev" (click)="scrollLeft(slider)">&#10094;</button>
+
+      <div class="image-slider" #slider>
+        <div class="slide-item">
+          <!-- Videos -->
+          @for (media of gameVideo; track media.image_id) {
+            <div
+              class="media-item-card"
+              [class.is-delete-mode]="isDelete"
+              [class.is-selected]="isSelected(media.image_id)"
+              (click)="toggleImg(media.image_id)"
+            >
+              <video class="video" controls [autoplay]="false">
+                <source [src]="media.image | staticUrl" type="video/mp4" />
+              </video>
+              @if (isDelete) {
+                <div class="media-overlay-select">
+                  <mat-icon>{{
+                    isSelected(media.image_id) ? 'check_circle' : 'radio_button_unchecked'
+                  }}</mat-icon>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Images -->
+          @for (pic of gameImage; track pic.image_id) {
+            <div
+              class="media-item-card"
+              [class.is-delete-mode]="isDelete"
+              [class.is-selected]="isSelected(pic.image_id)"
+              (click)="toggleImg(pic.image_id)"
+            >
+              <img [src]="pic.image | staticUrl" alt="Game Image" class="gallery-image" />
+              @if (isDelete) {
+                <div class="media-overlay-select">
+                  <mat-icon>{{
+                    isSelected(pic.image_id) ? 'check_circle' : 'radio_button_unchecked'
+                  }}</mat-icon>
+                </div>
+              }
+            </div>
+          } @empty {
+            @if (gameVideo.length === 0) {
+              <div class="empty-media-container">
+                <mat-icon>image_not_supported</mat-icon>
+                <p>ยังไม่มีภาพหรืองานวิดีโอประกอบของเกมนี้</p>
+              </div>
+            }
+          }
+        </div>
+      </div>
+
+      <button class="slide-btn next" (click)="scrollRight(slider)">&#10095;</button>
+    </div>
+  </div>
+</div>

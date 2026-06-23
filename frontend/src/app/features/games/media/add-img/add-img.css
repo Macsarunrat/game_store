@@ -1,0 +1,314 @@
+.dialog-shell {
+  width: 100%;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 1.5rem;
+  background: var(--nova-gradient-dialog-form);
+  color: var(--nova-primary-dark);
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.dialog-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: rgba(245, 168, 0, 0.18);
+  color: var(--nova-accent);
+}
+
+.dialog-icon mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.header-titles {
+  display: flex;
+  flex-direction: column;
+}
+
+.eyebrow,
+.dialog-subtitle,
+h2 {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--nova-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--nova-primary-dark);
+}
+
+.dialog-subtitle {
+  color: var(--nova-text-faint);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.form-grid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: start;
+}
+
+.field-label {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--nova-primary-dark);
+}
+
+.field-label mat-icon {
+  color: var(--nova-accent);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.field-row mat-form-field {
+  width: 100%;
+}
+
+/* File Upload Button Area */
+.media-upload-area {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+}
+
+.btn-file-select {
+  width: 100%;
+  height: 48px !important;
+  border-radius: 8px !important;
+  border: 1px dashed rgba(20, 19, 77, 0.3) !important;
+  color: var(--nova-primary-dark) !important;
+  font-weight: 600 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-file-select:hover {
+  background: var(--nova-accent-bg-soft) !important;
+  border-color: var(--nova-accent) !important;
+}
+
+/* Preview Section */
+.preview-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--nova-primary-dark);
+}
+
+.image-preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.image-item {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  overflow: visible;
+  border: 1px solid rgba(20, 19, 77, 0.15);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.img-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Video Preview badge */
+.video-preview-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--nova-surface-form-end);
+  border-radius: 8px;
+  padding: 0.5rem;
+  box-sizing: border-box;
+}
+
+.video-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  color: var(--nova-accent);
+}
+
+.video-name {
+  font-size: 0.75rem;
+  color: var(--nova-primary-dark);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.delete-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--nova-danger-dark);
+  color: var(--nova-text-on-dark);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  transition: background 0.2s;
+}
+
+.delete-btn:hover {
+  background: var(--nova-danger);
+}
+
+.delete-btn mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+/* Empty State Preview */
+.image-empty {
+  width: 100%;
+  height: 120px;
+  border: 1px dashed rgba(20, 19, 77, 0.2);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 19, 77, 0.02);
+  color: var(--nova-text-faint);
+  gap: 0.25rem;
+}
+
+.empty-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: rgba(20, 19, 77, 0.2);
+}
+
+.image-empty-text {
+  font-size: 0.85rem;
+  margin: 0;
+  color: var(--nova-text-faint);
+}
+
+/* Actions */
+.dialog-actions {
+  margin-top: 1.5rem;
+  display: flex;
+}
+
+.primary-action {
+  width: 100%;
+  height: 46px !important;
+  border-radius: 8px !important;
+  background: var(--nova-accent) !important;
+  color: var(--nova-bg-deep) !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  box-shadow: 0 4px 15px rgba(245, 168, 0, 0.25) !important;
+}
+
+.primary-action:hover:not(:disabled) {
+  background: var(--nova-accent-hover) !important;
+  transform: translateY(-1px);
+}
+
+.primary-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+:host ::ng-deep .mat-mdc-text-field-wrapper {
+  background: var(--nova-text-on-dark);
+}
+
+:host ::ng-deep .mdc-notched-outline__leading,
+:host ::ng-deep .mdc-notched-outline__notch,
+:host ::ng-deep .mdc-notched-outline__trailing {
+  border-color: rgba(20, 19, 77, 0.2) !important;
+}
+
+:host ::ng-deep .mdc-text-field--focused .mdc-notched-outline__leading,
+:host ::ng-deep .mdc-text-field--focused .mdc-notched-outline__notch,
+:host ::ng-deep .mdc-text-field--focused .mdc-notched-outline__trailing {
+  border-color: var(--nova-accent) !important;
+}
+
+:host ::ng-deep .mat-mdc-select-value,
+:host ::ng-deep .mat-mdc-select-arrow,
+:host ::ng-deep .mat-mdc-floating-label {
+  color: var(--nova-primary-dark) !important;
+}
+
+@media (max-width: 560px) {
+  .dialog-shell {
+    padding: 1.1rem;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .field-label {
+    min-height: 0;
+  }
+}

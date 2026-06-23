@@ -1,0 +1,282 @@
+/* 1. ห้ามไม่ให้ Angular ใส่ Padding หรือ Margin ที่ Body ตอนเปิด Dialog */
+.cdk-global-scrollblock {
+  position: initial !important;
+  width: 100% !important;
+  overflow: hidden !important; /* ซ่อนเฉพาะส่วนที่เกิน แต่ไม่ให้ขยับหน้าจอ */
+}
+
+/* 🎯 บังคับให้ขอบเหลี่ยม (border-radius: 0) */
+.custom-dialog-container {
+  max-width: 800px !important;
+  width: 90vw !important;
+}
+
+.custom-dialog-container .mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 24px;
+  padding: 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 74px;
+  background: var(--nova-gradient-dialog) !important;
+  border: 1px solid var(--nova-border-subtle);
+  box-shadow: var(--nova-shadow-dialog);
+  color: var(--nova-text-on-dark);
+}
+
+@media (max-width: 768px) {
+  .custom-dialog-container {
+    max-width: 95vw !important;
+    width: 95vw !important;
+  }
+  .custom-dialog-container .mat-mdc-dialog-container .mdc-dialog__surface {
+    padding: 1.25rem !important;
+    border-radius: 16px !important;
+    margin-top: 20px !important;
+  }
+}
+
+.custom-dialog-container ._ngcontent-ng-c3493831163 {
+  display: flex;
+}
+
+.customupdate-container .mat-mdc-dialog-container .mdc-dialog__surface {
+  display: flex;
+  margin: auto 0;
+  border-radius: 20px;
+  background: var(--nova-surface-dialog-light);
+  overflow: hidden;
+  box-shadow: var(--nova-shadow-dialog-light);
+}
+
+.adminUpdate-container .mat-mdc-dialog-container .mdc-dialog__surface {
+  display: flex;
+  margin: auto 0;
+  border-radius: 20px;
+}
+
+.custom-media-dialog-container .mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 24px;
+  padding: 2rem;
+  background: var(--nova-gradient-dialog) !important;
+  border: 1px solid var(--nova-border-subtle);
+  box-shadow: var(--nova-shadow-dialog);
+  color: var(--nova-text-on-dark);
+}
+
+.swal-container,
+.swal2-container {
+  z-index: 999999 !important;
+}
+
+.swal2-actions {
+  flex-direction: row-reverse !important;
+}
+
+/* Chrome/Safari */
+::-webkit-scrollbar {
+  display: none;
+}
+
+.paginator-container .mat-mdc-icon-button svg {
+  fill: var(--nova-text-on-dark) !important;
+}
+
+.mdc-checkbox__checkmark {
+  color: var(--nova-accent) !important;
+}
+
+.register-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  border-radius: 20px !important;
+}
+
+@media (max-width: 600px) {
+  .register-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+    border-radius: 20px !important;
+    overflow: scroll !important;
+    height: 90vh !important;
+  }
+}
+
+.custom-toolTip {
+  width: 1000px !important;
+  position: absolute !important;
+  bottom: 0 !important;
+}
+
+.pie-category-panel {
+  background: var(--nova-primary) !important;
+  border: 1px solid var(--nova-border-accent-panel);
+}
+
+.pie-category-panel .mat-mdc-option,
+.pie-category-panel .mat-mdc-option .mdc-list-item__primary-text,
+.pie-category-panel .mat-pseudo-checkbox {
+  color: var(--nova-text-on-dark) !important;
+  --mat-pseudo-checkbox-minimal-selected-checkmark-color: var(--nova-text-on-dark);
+  --mat-pseudo-checkbox-full-selected-checkmark-color: var(--nova-text-on-dark);
+}
+
+.pie-category-panel .mat-mdc-option:hover,
+.pie-category-panel .mat-mdc-option.mdc-list-item--selected {
+  background: var(--nova-overlay-hover) !important;
+}
+
+.pie-category-panel .mat-pseudo-checkbox-checked::after {
+  color: var(--nova-text-on-dark) !important;
+}
+
+.game-dialog-select-panel {
+  background: var(--nova-surface-light) !important;
+  border: 1px solid var(--nova-border-on-light);
+  border-radius: 10px !important;
+  box-shadow: var(--nova-shadow-select) !important;
+}
+
+.game-dialog-select-panel .mat-mdc-option,
+.game-dialog-select-panel .mat-mdc-option .mdc-list-item__primary-text,
+.game-dialog-select-panel .mat-pseudo-checkbox {
+  color: var(--nova-text-on-light) !important;
+  --mat-pseudo-checkbox-minimal-selected-checkmark-color: var(--nova-accent);
+  --mat-pseudo-checkbox-full-selected-checkmark-color: var(--nova-accent);
+}
+
+.game-dialog-select-panel .mat-mdc-option:hover,
+.game-dialog-select-panel .mat-mdc-option.mat-mdc-option-active,
+.game-dialog-select-panel .mat-mdc-option.mdc-list-item--selected {
+  background: var(--nova-accent-bg-soft) !important;
+}
+
+.game-dialog-select-panel .mat-mdc-option.mdc-list-item--selected:hover {
+  background: var(--nova-accent-bg-soft-hover) !important;
+}
+
+.custom-game-tooltip {
+  max-width: none !important;
+  white-space: nowrap !important;
+  font-size: 13px !important;
+  border-radius: 6px !important;
+}
+
+/* ===== Nova Confirm (SweetAlert2 shared confirm) ===== */
+.nova-confirm-popup.swal2-popup {
+  background: var(--nova-gradient-dialog) !important;
+  border: 1px solid var(--nova-border-subtle) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--nova-shadow-dialog-soft) !important;
+  padding: 2rem 1.5rem 1.25rem !important;
+  min-width: 280px;
+  max-width: 380px;
+  color: var(--nova-text-on-dark);
+}
+
+.nova-confirm-title.swal2-title {
+  font-size: 1.4rem !important;
+  font-weight: 700 !important;
+  color: var(--nova-text-on-dark) !important;
+  padding: 0 !important;
+}
+
+.nova-confirm-message.swal2-html-container {
+  font-size: 0.95rem !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+  margin: 0.5rem 0 0 !important;
+}
+
+.nova-confirm-icon.swal2-icon {
+  margin: 0 auto 0.75rem !important;
+  border-color: rgba(245, 168, 0, 0.35) !important;
+  color: var(--nova-accent) !important;
+}
+
+.nova-confirm-icon.swal2-warning {
+  border-color: rgba(245, 168, 0, 0.45) !important;
+  color: var(--nova-accent) !important;
+}
+
+.nova-confirm-icon.swal2-question {
+  border-color: rgba(245, 168, 0, 0.35) !important;
+  color: var(--nova-accent) !important;
+}
+
+.nova-confirm-popup .swal2-actions {
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 1.25rem;
+}
+
+.nova-confirm-btn {
+  flex: 1;
+  margin: 0 !important;
+  padding: 0.6rem 1rem !important;
+  border-radius: 10px !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+.nova-confirm-btn-cancel {
+  background: rgba(209, 66, 73, 0.15) !important;
+  color: var(--nova-danger) !important;
+  border: 1px solid rgba(209, 66, 73, 0.4) !important;
+}
+
+.nova-confirm-btn-confirm {
+  background: rgba(46, 125, 50, 0.2) !important;
+  color: var(--nova-success-material) !important;
+  border: 1px solid rgba(46, 125, 50, 0.45) !important;
+}
+
+.nova-confirm-btn-danger {
+  background: rgba(255, 122, 144, 0.2) !important;
+  color: var(--nova-danger-swal) !important;
+  border: 1px solid rgba(255, 122, 144, 0.45) !important;
+}
+
+.nova-confirm-btn-deny {
+  background: rgba(245, 168, 0, 0.15) !important;
+  color: var(--nova-accent) !important;
+  border: 1px solid rgba(245, 168, 0, 0.4) !important;
+}
+
+/* ===== Global Loading Spinner ===== */
+.global-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(7, 7, 26, 0.7) !important;
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000000 !important; /* Top layer above SweetAlert */
+  opacity: 0;
+  animation: fadeInOverlay 0.25s forwards ease;
+}
+
+.loader-spinner {
+  width: 64px;
+  height: 64px;
+  border: 4px solid rgba(245, 168, 0, 0.1);
+  border-top: 4px solid var(--nova-accent, #f5a800);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  box-shadow: 0 0 25px rgba(245, 168, 0, 0.25);
+}
+
+@keyframes fadeInOverlay {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

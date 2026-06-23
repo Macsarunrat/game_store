@@ -1,0 +1,149 @@
+<div class="all-container">
+  <!-- Sidebar -->
+  <div class="sidebar-container" appFadeRight [fadeInDelay]="'0.2s'">
+    <div class="sidebar-textbox">
+      <span class="navbar-search-content">
+        <input
+          matInput
+          class="navbar-search-input"
+          placeholder="Search Game"
+          #searchInput
+          (input)="search(searchInput.value)"
+        />
+        <!-- (click)="search(searchInput.value)" -->
+        <mat-icon fontIcon="search" class="navbar-search-icon"></mat-icon>
+      </span>
+    </div>
+
+    <mat-selection-list
+      #categoryList
+      (selectionChange)="onCategoryChange($event)"
+      [class.collapsed]="isCategoriesCollapsed"
+    >
+      <div class="category-header">
+        <label class="cate-label">Categories</label>
+
+        <div class="category-header-actions">
+          @if (categoryList.selectedOptions.selected.length > 0) {
+            <div class="clear-selected" (click)="clearSelected()">
+              <mat-icon>close</mat-icon>
+            </div>
+          }
+
+          <button mat-icon-button class="category-hamburger-btn" (click)="toggleCategoriesMenu()">
+            <mat-icon>{{ isCategoriesCollapsed ? 'menu' : 'close' }}</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      @for (cateAll of categories; track cateAll.catagory_id) {
+        <mat-list-option
+          class="mat-cate-list"
+          [value]="cateAll.catagory_name"
+          [selected]="isSelected(cateAll.catagory_name)"
+          [class.is-category-selected]="isSelected(cateAll.catagory_name)"
+        >
+          <p>{{ cateAll.catagory_name }}</p>
+        </mat-list-option>
+      }
+    </mat-selection-list>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content-container">
+    <!-- Paginator และปุ่ม — fixed ไม่ scroll -->
+    <div class="owner-btn-container">
+      @if (auth.hasRole('owner')) {
+        <div class="owner-btn-box">
+          <button matButton class="owner-create-btn" (click)="openCreate()">+ Create Game</button>
+          @if (isDelete === true) {
+            <button
+              matButton
+              class="btn-confirm"
+              (click)="dialogDel()"
+              [disabled]="selectedGames.length == 0"
+            >
+              <mat-icon>check</mat-icon>
+              <span>ยืนยัน</span>
+            </button>
+            <button matButton class="btn-cancel" (click)="deleteGame()">
+              <mat-icon>close</mat-icon>
+              <span>ยกเลิก</span>
+            </button>
+          } @else {
+            <button matButton class="owner-delete-btn" (click)="deleteGame()">- Delete Game</button>
+          }
+        </div>
+      }
+
+      <mat-paginator
+        [length]="gameAll.length"
+        [pageSize]="pageSize"
+        [pageIndex]="currentPage"
+        aria-label="Select page"
+        (page)="handlePageEvent($event)"
+        class="paginator-container"
+      >
+      </mat-paginator>
+    </div>
+
+    <!-- Grid — scroll เฉพาะส่วนนี้ -->
+    <div class="games-grid">
+      @for (game of pageGames; track game.game_id) {
+        <div class="grid-content card-content" appAnimation>
+          @let mainImage = game.images.filter((img) => img.is_main).at(-1);
+          <div
+            class="img-wrapper-container"
+            (click)="isDelete ? toggleGame(game.game_id) : gameDescript(game.game_id)"
+            [class.is-selected]="isGameSelected(game.game_id)"
+            [class.is-delete]="isDelete"
+          >
+            @if (mainImage) {
+              <img mat-card-image [src]="mainImage.image | staticUrl" class="card-img-list" />
+            } @else {
+              <div mat-card-image class="empty-img-container">
+                <p>No Image</p>
+              </div>
+            }
+          </div>
+
+          <div class="mat-categories">
+            @for (cate of game.catagories; track $index) {
+              <button [disabled]="!cate" mat-button class="mat-categories-btn">
+                {{ cate || 'unknown' }}
+              </button>
+            }
+          </div>
+
+          <div class="game-detail-container">
+            <div class="game-name-container">
+              <p
+                class="game-name"
+                [matTooltip]="game.name"
+                matTooltipPosition="above"
+                matTooltipClass="tootips custom-game-tooltip"
+              >
+                {{ game.name }}
+              </p>
+            </div>
+            <div class="game-price-container">
+              <p class="game-price">{{ game.price == 0 ? 'Free' : game.price + ' ฿' }}</p>
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <p
+          style="
+            color: #718096;
+            font-size: 1rem;
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+          "
+        >
+          🔍 ไม่พบข้อมูลเกม
+        </p>
+      }
+    </div>
+  </div>
+</div>

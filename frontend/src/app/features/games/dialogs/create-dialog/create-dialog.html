@@ -1,0 +1,79 @@
+<div class="dialog-shell">
+  <header class="dialog-header">
+    <div class="dialog-icon">
+      <mat-icon>add_circle</mat-icon>
+    </div>
+    <div>
+      <p class="eyebrow">NOVA STORE</p>
+      <h2>สร้างเกมใหม่</h2>
+      <p class="dialog-subtitle">กรอกรายละเอียดเกมและเลือกหมวดหมู่ที่ต้องการแสดงในร้าน</p>
+    </div>
+  </header>
+
+  <section class="form-grid">
+    <label class="field-row">
+      <span class="field-label">
+        <mat-icon>label</mat-icon>
+        <strong>ชื่อเกม</strong>
+      </span>
+      <mat-form-field appearance="outline">
+        <mat-label>เช่น เกมใหม่...</mat-label>
+        <input matInput [formControl]="currentgameName" />
+      </mat-form-field>
+    </label>
+
+    <label class="field-row">
+      <span class="field-label">
+        <mat-icon>paid</mat-icon>
+        <strong>ราคา</strong>
+      </span>
+      <mat-form-field appearance="outline">
+        <mat-label>เช่น 1300</mat-label>
+        <input matInput [formControl]="currentgamePrice" />
+        <mat-error>ต้องเป็นตัวเลขจำนวนเต็มบวกเท่านั้น</mat-error>
+      </mat-form-field>
+    </label>
+
+    <label class="field-row">
+      <span class="field-label">
+        <mat-icon>description</mat-icon>
+        <strong>รายละเอียด</strong>
+      </span>
+      <mat-form-field appearance="outline">
+        <mat-label>เช่น เป็นเกมผจญภัยแนวใหม่...</mat-label>
+        <textarea matInput rows="3" [formControl]="currentgameDescription"></textarea>
+      </mat-form-field>
+    </label>
+
+    <label class="field-row">
+      <span class="field-label">
+        <mat-icon>category</mat-icon>
+        <strong>หมวดหมู่</strong>
+      </span>
+      <mat-form-field appearance="outline">
+        <mat-label>เลือกหมวดหมู่เกม</mat-label>
+        <mat-select [formControl]="gameCategory" multiple panelClass="game-dialog-select-panel">
+          @for (gamecate of categoryList; track gamecate.catagory_id) {
+            <mat-option [value]="gamecate.catagory_name">{{ gamecate.catagory_name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </label>
+  </section>
+
+  <footer class="dialog-actions">
+    <button
+      matButton
+      class="primary-action"
+      (click)="createGame()"
+      [disabled]="
+        currentgameName.invalid ||
+        currentgamePrice.invalid ||
+        currentgameDescription.invalid ||
+        gameCategory.invalid
+      "
+    >
+      สร้างเกม
+    </button>
+  </footer>
+</div>

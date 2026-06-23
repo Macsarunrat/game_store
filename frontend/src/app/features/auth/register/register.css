@@ -1,0 +1,59 @@
+.register-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 35px;
+  gap: 0.8rem;
+}
+
+.register-title {
+  text-align: center;
+}
+
+.inline-field-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.inline-field-content {
+  display: flex;
+  flex-direction: column;
+  width: 48%;
+}
+
+.block-field-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-main-label {
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.register-btn {
+  border-radius: 5px;
+}
+
+input::placeholder {
+  color: var(--nova-text-placeholder) !important;
+  opacity: 1;
+}
+
+/* 📱 Responsive Styles for Mobile & Tablet */
+@media (max-width: 600px) {
+  .register-container {
+    padding: 15px; /* ลด Padding บนมือถือ */
+    gap: 0.5rem;
+  }
+
+  .inline-field-container {
+    flex-direction: column; /* เปลี่ยนจากแนวนอนเป็นแนวตั้ง */
+    gap: 0.5rem;
+  }
+
+  .inline-field-content {
+    width: 100%; /* ให้กว้างเต็มแถว */
+  }
+}
+

@@ -1,0 +1,86 @@
+<mat-toolbar color="primary" class="navbar-container">
+  <div class="navbar-content">
+    <span class="navbar-icon-container" (click)="toMain()">
+      <img src="/LoginImg/IconImg2.png" alt="" class="navbar-icon-content" />
+      <a style="cursor: pointer">NOVA STORE</a>
+    </span>
+
+    <span class="navbar-choice-content">
+      @if (auth.hasRole('customer')) {
+        <div
+          (click)="toMain()"
+          class="navbar-navigator-container2"
+          [class.active-link]="isActive('/main')"
+          [class.active]="isPaymentSuccessActive"
+        >
+          <mat-icon matPrefix class="navbar-navigator-icon">storefront</mat-icon>
+          <a>Store</a>
+        </div>
+      } @else {
+        <div
+          (click)="toGameManage()"
+          class="navbar-navigator-container2"
+          [class.active-link]="isActive('/game-manage')"
+        >
+          <mat-icon matPrefix class="navbar-navigator-icon">storefront</mat-icon>
+          <a>Game Manage</a>
+        </div>
+      }
+      @if (auth.hasRole('customer')) {
+        <div
+          (click)="goLibrary()"
+          class="navbar-navigator-container2"
+          [class.active-link]="isActive('/library')"
+        >
+          <mat-icon matPrefix class="navbar-navigator-icon">receipt</mat-icon>
+
+          <a>Order</a>
+        </div>
+      } @else {
+        <div
+          (click)="goOrder()"
+          class="navbar-navigator-container2"
+          [class.active-link]="isActive('/order')"
+        >
+          <mat-icon matPrefix class="navbar-navigator-icon">receipt</mat-icon>
+
+          <a>Order</a>
+        </div>
+      }
+      <div
+        (click)="goChat()"
+        class="navbar-navigator-container2"
+        [class.active-link]="isActive('/chat')"
+      >
+        <mat-icon matPrefix class="navbar-navigator-icon">chat</mat-icon>
+        <a>Chat</a>
+      </div>
+      @if (auth.hasRole('owner')) {
+        <div
+          (click)="goDashboard()"
+          class="navbar-navigator-container2"
+          routerLinkActive="active-link"
+          [class.active-link]="isActive('/dashboard')"
+        >
+          <mat-icon matPrefix class="navbar-navigator-icon">dashboard</mat-icon>
+          <a>Dashboard</a>
+        </div>
+      }
+    </span>
+  </div>
+
+  <span class="navbar-user-container">
+    <div class="navbar-profile-container">
+      <span class="navbar-profile">
+        {{ auth.currentUserValue?.username!.charAt(0).toUpperCase() }}
+      </span>
+    </div>
+
+    <main class="navbar-profile-initial">
+      สวัสดี ,
+      {{ auth.currentUserValue?.firstname }}
+    </main>
+
+    <button matButton class="navbar-logout-btn" (click)="toLogout()">Logout</button>
+  </span>
+</mat-toolbar>

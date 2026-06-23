@@ -1,0 +1,149 @@
+<div class="game-manage-container">
+  <!-- 💻 Main Content Panel -->
+  <main class="main-content-panel">
+    <div class="page-header">
+      <div class="header-left">
+        <h2 class="page-title">Asset Catalog</h2>
+        <p class="subtitle">ระบบจัดการสินค้าและคลังเกม NOVA STORE</p>
+      </div>
+
+      <div class="header-actions">
+        <span class="navbar-search-content">
+          <input
+            matInput
+            class="navbar-search-input"
+            type="text"
+            placeholder="Search Game"
+            #searchInput
+            (input)="search(searchInput.value)"
+          />
+          <mat-icon fontIcon="search" class="navbar-search-icon"></mat-icon>
+        </span>
+
+        <!-- Only visible to Owner -->
+        <button *ngIf="isOwner" mat-flat-button class="btn-create" (click)="openCreateDialog()">
+          <mat-icon>add_circle</mat-icon>
+          <span>สร้างเกมใหม่</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Glassmorphic Table Card -->
+    <div class="table-card">
+      <div class="table-responsive">
+        <table class="catalog-table">
+          <thead>
+            <tr>
+              <th class="col-game">GAME</th>
+              <th class="col-category">CATEGORY</th>
+              <th class="col-pricing">PRICING</th>
+              <th class="col-status">STATUS</th>
+              <th class="col-actions">ACTION</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let game of pageGames" (click)="openMediaDialog(game)" appAnimation>
+              <!-- Game Image & Title -->
+              <td class="col-game">
+                <div class="game-cell-content">
+                  <div
+                    class="cover-image-wrapper"
+                    (click)="onImageClick(game); $event.stopPropagation()"
+                    title="คลิกเพื่ออัปโหลดภาพใหม่ หรือ ลบภาพนี้"
+                  >
+                    <img
+                      *ngIf="getMainImage(game)"
+                      [src]="getMainImage(game) | staticUrl"
+                      alt="game cover"
+                      class="cover-image"
+                    />
+                    <div *ngIf="!getMainImage(game)" class="cover-placeholder">
+                      <mat-icon>image_not_supported</mat-icon>
+                    </div>
+                    <div class="cover-hover-overlay">
+                      <mat-icon>add_a_photo</mat-icon>
+                    </div>
+                  </div>
+                  <div class="title-cell">
+                    <span class="game-name-text">{{ game.name }}</span>
+                    <span class="game-id-text">ID: {{ game.game_id }}</span>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Category string -->
+              <td class="col-category">
+                <span class="category-text">{{ getCategoryString(game) }}</span>
+              </td>
+
+              <!-- Price -->
+              <td class="col-pricing">
+                <span class="price-text">{{ game.price === 0 ? 'Free' : game.price + ' ฿' }}</span>
+              </td>
+
+              <!-- Active / Offline Status badge -->
+              <td class="col-status">
+                <button
+                  mat-button
+                  class="status-badge"
+                  [class.status-active]="!isGameHidden(game)"
+                  [class.status-offline]="isGameHidden(game)"
+                  (click)="editStatus($event, game)"
+                  $event.stopPropagation()
+                >
+                  {{ isGameHidden(game) ? 'Offline' : 'Active' }}
+                </button>
+              </td>
+
+              <!-- Edit & Delete Buttons -->
+              <td class="col-actions">
+                <div class="action-buttons">
+                  <button
+                    mat-button
+                    class="btn-edit"
+                    (click)="openEditDialog(game); $event.stopPropagation()"
+                  >
+                    Edit
+                  </button>
+
+                  <!-- Only visible to Owner -->
+                  <button
+                    *ngIf="isOwner"
+                    mat-button
+                    class="btn-delete"
+                    (click)="deleteGame(game); $event.stopPropagation()"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Empty State -->
+            <tr *ngIf="filteredGames.length === 0">
+              <td colspan="5" class="empty-table-row">
+                <mat-icon class="empty-icon">search_off</mat-icon>
+                <p>ไม่พบสินค้าที่ต้องการค้นหา</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer" *ngIf="filteredGames.length > 0">
+        <span class="table-count"
+          >แสดง {{ pageGames.length }} จาก {{ filteredGames.length }} เกม</span
+        >
+        <mat-paginator
+          [length]="filteredGames.length"
+          [pageSize]="pageSize"
+          [pageIndex]="currentPage"
+          [hidePageSize]="true"
+          aria-label="Game manage pages"
+          (page)="handlePageEvent($event)"
+          class="paginator-container"
+        >
+        </mat-paginator>
+      </div>
+    </div>
+  </main>
+</div>

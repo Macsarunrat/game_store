@@ -48,7 +48,7 @@ A comprehensive Game Store Management System developed over a **2-month period a
     ```
 5. Ready to use
     ```bash
-        http://localhost:4200/login
+        http://localhost:80/login
     ```
 
 ## API Document

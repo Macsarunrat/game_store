@@ -1,0 +1,46 @@
+<div id="chart" class="donut-chart-container" (mousemove)="onMouseMove($event)">
+  @if (isChartReady === false) {
+    <apx-chart
+      [series]="chartOptions.series!"
+      [chart]="chartOptions.chart!"
+      [labels]="chartOptions.labels!"
+      [colors]="chartOptions.colors!"
+      [dataLabels]="chartOptions.dataLabels!"
+      [legend]="chartOptions.legend!"
+      [plotOptions]="chartOptions.plotOptions!"
+      [responsive]="chartOptions.responsive!"
+      [theme]="chartOptions.theme!"
+      [tooltip]="chartOptions.tooltip!"
+      [title]="chartOptions.title!"
+    >
+    </apx-chart>
+    <mat-form-field appearance="outline" class="pie-category-select">
+      <mat-label>เลือกหมวด
+        
+      </mat-label>
+      <mat-select
+        [formControl]="selectedCate"
+        panelClass="pie-category-panel"
+        (selectionChange)="isSelected($event)"
+      >
+        @for (cateName of categoryList; track cateName.catagory_id) {
+          <mat-option [value]="cateName">{{ cateName.catagory_name }} </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  } @else {
+    <apx-chart
+      [series]="chartOptions.series!"
+      [chart]="chartOptions.chart!"
+      [labels]="chartOptions.labels!"
+      [colors]="chartOptions.colors!"
+      [dataLabels]="chartOptions.dataLabels!"
+      [legend]="chartOptions.legend!"
+      [plotOptions]="chartOptions.plotOptions!"
+      [responsive]="chartOptions.responsive!"
+      [theme]="chartOptions.theme!"
+      [tooltip]="chartOptions.tooltip!"
+      [title]="chartOptions.title!"
+    ></apx-chart>
+  }
+</div>

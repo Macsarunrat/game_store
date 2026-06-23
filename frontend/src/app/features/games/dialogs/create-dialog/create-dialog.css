@@ -1,0 +1,155 @@
+.dialog-shell {
+  width: 100%;
+  max-height: calc(100dvh - 48px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 1.5rem;
+  background: var(--nova-gradient-dialog-form);
+  color: var(--nova-primary-dark);
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.dialog-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: rgba(245, 168, 0, 0.18);
+  color: var(--nova-accent);
+}
+
+.dialog-icon mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+}
+
+.eyebrow,
+.dialog-subtitle,
+h2 {
+  margin: 0;
+}
+
+.eyebrow {
+  color: var(--nova-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--nova-primary-dark);
+}
+
+.dialog-subtitle {
+  color: var(--nova-text-faint);
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+
+.form-grid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 0.85rem;
+  align-items: start;
+}
+
+.field-label {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--nova-primary-dark);
+}
+
+.field-label mat-icon {
+  color: var(--nova-accent);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.field-row mat-form-field {
+  width: 100%;
+}
+
+.dialog-actions {
+  margin-top: 1.25rem;
+  display: flex;
+}
+
+.primary-action {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 8px;
+  border: none;
+  background: var(--nova-accent) !important;
+  color: var(--nova-bg-deep) !important;
+  font-weight: 700;
+}
+
+.primary-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+:host ::ng-deep .mat-mdc-text-field-wrapper {
+  background: var(--nova-text-on-dark);
+}
+
+:host ::ng-deep .mdc-notched-outline__leading,
+:host ::ng-deep .mdc-notched-outline__notch,
+:host ::ng-deep .mdc-notched-outline__trailing {
+  border-color: rgba(20, 19, 77, 0.2) !important;
+}
+
+:host ::ng-deep .mdc-text-field--focused .mdc-notched-outline__leading,
+:host ::ng-deep .mdc-text-field--focused .mdc-notched-outline__notch,
+:host ::ng-deep .mdc-text-field--focused .mdc-notched-outline__trailing {
+  border-color: var(--nova-accent) !important;
+}
+
+:host ::ng-deep .mat-mdc-input-element,
+:host ::ng-deep .mat-mdc-select-value,
+:host ::ng-deep .mat-mdc-select-arrow,
+:host ::ng-deep .mat-mdc-floating-label {
+  color: var(--nova-primary-dark) !important;
+}
+
+:host ::ng-deep .mat-mdc-select-placeholder {
+  color: var(--nova-text-faint) !important;
+}
+
+:host ::ng-deep .mat-mdc-form-field-error {
+  color: var(--nova-danger-swal) !important;
+}
+
+@media (max-width: 560px) {
+  .dialog-shell {
+    padding: 1.1rem;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .field-label {
+    min-height: 0;
+  }
+}

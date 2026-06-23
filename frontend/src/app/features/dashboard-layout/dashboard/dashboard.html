@@ -1,0 +1,77 @@
+<div class="container">
+  <div class="content-container">
+    <header class="score-chart-container">
+      @if (scoreData) {
+        <app-score-chart
+          class="score-chart"
+          [icon]="'paid'"
+          [label]="'รายได้ทั้งหมด'"
+          [value]="'฿ ' + scoreData.total_income"
+        ></app-score-chart>
+        <app-score-chart
+          class="score-chart"
+          [icon]="'reorder'"
+          [label]="'จำนวนคำสั่งซื้อทั้งหมด'"
+          [value]="scoreData.total_order + ' ครั้ง'"
+        ></app-score-chart>
+        <app-score-chart
+          class="score-chart"
+          [icon]="'stars'"
+          [label]="'เกมที่ขายดีที่สุด'"
+          [value]="scoreData.best_seller_game"
+          [matTooltip]="scoreData.best_seller_game.toString()"
+          matTooltipPosition="below"
+          matTooltipClass="custom-toolTip"
+        ></app-score-chart>
+        <app-score-chart
+          class="score-chart"
+          [icon]="'person_heart'"
+          [label]="'จำนวนผู้ใช้งานในวันนี้'"
+          [value]="scoreData.active_user_a_day + ' บัญชี'"
+          >4</app-score-chart
+        >
+      }
+    </header>
+
+    <aside class="date-title-container">
+      <main class="date-title-content">
+        <mat-icon>date_range</mat-icon>
+        <p>ช่วงเวลา</p>
+      </main>
+      <section class="date-filter-content">
+        <button
+          matButton
+          (click)="onDateChange(wordQuery[0])"
+          [class.is-selected]="selectedFilter === wordQuery[0]"
+        >
+          วัน
+        </button>
+        <button
+          matButton
+          (click)="onDateChange(wordQuery[1])"
+          [class.is-selected]="selectedFilter === wordQuery[1]"
+        >
+          สัปดาห์
+        </button>
+        <button
+          matButton
+          (click)="onDateChange(wordQuery[2])"
+          [class.is-selected]="selectedFilter === wordQuery[2]"
+        >
+          เดือน
+        </button>
+        <button
+          matButton
+          (click)="onDateChange(wordQuery[3])"
+          [class.is-selected]="selectedFilter === wordQuery[3]"
+        >
+          ปี
+        </button>
+      </section>
+    </aside>
+    <section class="line-chart-container">
+      <app-area-chart></app-area-chart>
+      <app-donut-chart></app-donut-chart>
+    </section>
+  </div>
+</div>

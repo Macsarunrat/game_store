@@ -1,0 +1,13 @@
+.main-layout {
+  min-height: 100vh;
+}
+
+.layout-navbar {
+  position: fixed;
+  z-index: 999;
+  width: 100vw;
+}
+
+.main-content {
+  min-height: calc(100vh);
+}

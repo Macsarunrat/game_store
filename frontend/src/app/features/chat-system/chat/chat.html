@@ -1,0 +1,288 @@
+<div class="container" [class.has-active-chat]="selectedFriendId !== null">
+  <aside class="user-container">
+    <div>
+      <div class="account-container">
+        <div class="account-user">
+          <mat-icon class="account-icon">person</mat-icon>
+        </div>
+        <div class="account-detail">
+          <h2>{{ usernameUser }}</h2>
+          <p>{{ firstnameUser }}</p>
+        </div>
+      </div>
+
+      <!-- Segmented Tabs for Mobile/Tablet -->
+      <div class="sidebar-tabs">
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'friends'"
+          (click)="activeTab = 'friends'"
+        >
+          <mat-icon>people</mat-icon>
+          <span>Friends</span>
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab === 'requests'"
+          (click)="activeTab = 'requests'"
+        >
+          <mat-icon>group_add</mat-icon>
+          <span>Requests</span>
+        </button>
+      </div>
+
+      @if (activeTab === 'friends') {
+        <div class="friend-title-container">
+          <mat-icon class="friend-title-icon">people</mat-icon>
+          <h2 class="friend-title-text">Friend</h2>
+        </div>
+        <mat-divider class="m-divider2"></mat-divider>
+        <span class="search-content">
+          <input
+            [formControl]="searchInput"
+            matInput
+            class="friend-search"
+            placeholder="Search Friend"
+          />
+          <mat-icon fontIcon="search" class="search-icon"></mat-icon>
+        </span>
+
+        <mat-divider class="m-divider"></mat-divider>
+
+        <div class="friend-scroll-container">
+          @for (user of filteredUserData; track user.id) {
+            @if (user.status === 'friend') {
+              <div
+                class="friend-container"
+                (click)="onSelectFriend(user)"
+                [class.is-selected]="selectedFriendId === user.id"
+              >
+                <div class="user-icon">
+                  <mat-icon class="friend-icon">person</mat-icon>
+                </div>
+                <div class="friend-list-container">
+                  <div class="friend-list-header">
+                    <div class="friend-list-content">
+                      <h2>{{ user.first_name }}</h2>
+                      <h2>{{ user.last_name }}</h2>
+                    </div>
+
+                    <div class="friend-list-time">
+                      <p>{{ getDisplayTime(user.created_at) }}</p>
+                    </div>
+                  </div>
+
+                  <div class="friend-list-message">
+                    @if (user.latest_id === currentUser) {
+                      <p>you : {{ user.lasted_message }}</p>
+                    } @else {
+                      <p>{{ user.lasted_message }}</p>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+
+      @if (activeTab === 'requests') {
+        <div class="sidebar-requests-wrapper">
+          <div class="sub-section-box">
+            <div class="section-header-content">
+              <mat-icon class="section-header-icon">group_add</mat-icon>
+              <h3 class="section-header-text">Friend Requests</h3>
+            </div>
+            <mat-divider class="custom-divider line-orange"></mat-divider>
+
+            <div class="friend-request-scroll">
+              @for (user of userData; track user.id) {
+                @if (user.status === 'pending' && user.requester_id !== currentUser) {
+                  <div class="friend-list-request-content">
+                    <div class="user-icon2">
+                      <mat-icon class="friend-icon2">person</mat-icon>
+                    </div>
+                    <div class="user-name-wrapper">
+                      <h4>{{ user.first_name }}</h4>
+                      <h4>{{ user.last_name }}</h4>
+                    </div>
+                    <button matButton class="accept-btn" (click)="acceptFriend(user.id)">
+                      Accept
+                    </button>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+
+          <div class="sub-section-box">
+            <div class="section-header-content">
+              <mat-icon class="section-header-icon">groups</mat-icon>
+              <h3 class="section-header-text">Discovery</h3>
+            </div>
+            <mat-divider class="custom-divider line-blue"></mat-divider>
+
+            <div class="friend-request-scroll">
+              @for (user of userData; track user.id) {
+                @if (user.status === null) {
+                  <div class="friend-list-request-content">
+                    <div class="user-icon2">
+                      <mat-icon class="friend-icon2">person</mat-icon>
+                    </div>
+                    <div class="user-name-wrapper">
+                      <h4>{{ user.first_name }}</h4>
+                      <h4>{{ user.last_name }}</h4>
+                    </div>
+                    <button matButton class="add-friend-btn" (click)="addFriend(user.id)">
+                      Add friend
+                    </button>
+                  </div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </aside>
+
+  <section class="message-container">
+    <header>
+      <div class="current-chat-name-container">
+        @if (selectedFriendId !== null) {
+          <button class="back-to-list-btn" (click)="onBackToFriends()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+        }
+        <div class="current-chat-friend">
+          <mat-icon class="friend-icon">person</mat-icon>
+        </div>
+        <h2 class="current-chat-name">{{ currentFriendChat }}</h2>
+        <div class="current-chat-icon-container">
+          <mat-icon class="current-chat-icon-bar">search</mat-icon>
+          <mat-icon class="current-chat-icon-bar">favorite_border</mat-icon>
+          <mat-icon class="current-chat-icon-bar">notifications_none</mat-icon>
+        </div>
+      </div>
+      <mat-divider class="m-divider-person"></mat-divider>
+    </header>
+    <main #scrollRef class="main-chat-container">
+      <div class="main-chat-content">
+        @for (userMsg of message(); track $index; let i = $index) {
+          @if (isNewDay(i)) {
+            <div class="date-divider">
+              <span>{{ userMsg.created_at | date: 'EEE d MMM' : '' : 'th-TH' }}</span>
+            </div>
+          }
+          @if (userMsg.sender_id === auth.currentUserValue?.user_id) {
+            <div class="chat-own-container">
+              <div class="chat-date-content">
+                <p class="chat-date-text">
+                  {{ userMsg.created_at | date: 'HH:mm' + ' น.' }}
+                </p>
+              </div>
+
+              <div class="current-chat-own-container" appAnimation>
+                <p style="margin: 0; text-align: start">{{ userMsg.message }}</p>
+              </div>
+
+              <div
+                class="user-read-container"
+                [style.visibility]="isLastInGroup(i) ? 'visible' : 'hidden'"
+              >
+                <mat-icon class="user-read-icon">person</mat-icon>
+              </div>
+            </div>
+          } @else {
+            <div class="chat-friend-container">
+              <div
+                class="user-read-container"
+                [style.visibility]="isLastInGroup(i) ? 'visible' : 'hidden'"
+              >
+                <mat-icon class="user-read-icon">person</mat-icon>
+              </div>
+
+              <div class="current-chat-friend-container" appAnimation>
+                <p style="margin: 0">{{ userMsg.message }}</p>
+              </div>
+              <div class="chat-date-content">
+                <p class="chat-date-text">
+                  {{ userMsg.created_at | date: 'HH:mm' + ' น.' }}
+                </p>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </main>
+    <div class="input-message-container">
+      <div class="input-message-content">
+        <textarea
+          matInput
+          [formControl]="inputText"
+          class="input-message"
+          placeholder="Write Something"
+          (keydown.enter)="onEnter($event)"
+          rows="1"
+        ></textarea>
+        <div class="send-icon" (click)="send()">
+          <mat-icon class="icon">send</mat-icon>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="all-request-container">
+    <div class="sub-section-box">
+      <div class="section-header-content">
+        <mat-icon class="section-header-icon">group_add</mat-icon>
+        <h3 class="section-header-text">Friend Requests</h3>
+      </div>
+      <mat-divider class="custom-divider line-orange"></mat-divider>
+
+      <div class="friend-request-scroll">
+        @for (user of userData; track user.id) {
+          @if (user.status === 'pending' && user.requester_id !== currentUser) {
+            <div class="friend-list-request-content">
+              <div class="user-icon2">
+                <mat-icon class="friend-icon2">person</mat-icon>
+              </div>
+              <div class="user-name-wrapper">
+                <h4>{{ user.first_name }}</h4>
+                <h4>{{ user.last_name }}</h4>
+              </div>
+              <button matButton class="accept-btn" (click)="acceptFriend(user.id)">Accept</button>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <div class="sub-section-box">
+      <div class="section-header-content">
+        <mat-icon class="section-header-icon">groups</mat-icon>
+        <h3 class="section-header-text">Discovery</h3>
+      </div>
+      <mat-divider class="custom-divider line-blue"></mat-divider>
+
+      <div class="friend-request-scroll">
+        @for (user of userData; track user.id) {
+          @if (user.status === null) {
+            <div class="friend-list-request-content">
+              <div class="user-icon2">
+                <mat-icon class="friend-icon2">person</mat-icon>
+              </div>
+              <div class="user-name-wrapper">
+                <h4>{{ user.first_name }}</h4>
+                <h4>{{ user.last_name }}</h4>
+              </div>
+              <button matButton class="add-friend-btn" (click)="addFriend(user.id)">
+                Add friend
+              </button>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </main>
+</div>

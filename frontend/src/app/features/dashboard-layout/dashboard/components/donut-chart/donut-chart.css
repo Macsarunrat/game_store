@@ -1,0 +1,133 @@
+.donut-chart-container {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  position: relative;
+  align-items: center;
+  background: var(--nova-primary);
+  border-radius: 8px;
+  box-sizing: border-box;
+  justify-content: center;
+  overflow: hidden;
+  padding: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--nova-overlay-glass);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.donut-chart-container:hover {
+  border-color: rgba(76, 201, 240, 0.3);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+}
+
+.donut-chart-container apx-chart {
+  display: block;
+  flex: 1 1 100%;
+  height: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+:host ::ng-deep .donut-chart-container .apexcharts-tooltip {
+  left: var(--mouse-x) !important;
+  top: calc(var(--mouse-y) + 20px) !important;
+  transform: translate(-50%, 0) !important;
+  transition: none !important;
+  pointer-events: none !important;
+}
+
+.pie-category-select {
+  position: absolute;
+  right: 1rem;
+  top: 3.15rem;
+  z-index: 2;
+  width: 132px;
+  --mdc-outlined-text-field-outline-color: var(--nova-surface-toast) 8e;
+  --mdc-outlined-text-field-hover-outline-color: var(--nova-surface-toast) 8e;
+  --mdc-outlined-text-field-focus-outline-color: var(--nova-surface-toast) 8e;
+  --mdc-outlined-text-field-label-text-color: var(--nova-text-on-dark);
+  --mdc-outlined-text-field-hover-label-text-color: var(--nova-text-on-dark);
+  --mdc-outlined-text-field-focus-label-text-color: var(--nova-text-on-dark);
+  --mat-select-enabled-trigger-text-color: var(--nova-text-on-dark);
+  --mat-select-enabled-arrow-color: var(--nova-text-on-dark);
+  --mat-select-focused-arrow-color: var(--nova-text-on-dark);
+}
+
+:host ::ng-deep .pie-category-select .mat-mdc-select-value,
+:host ::ng-deep .pie-category-select .mat-mdc-select-placeholder,
+:host ::ng-deep .pie-category-select .mat-mdc-select-arrow,
+:host ::ng-deep .pie-category-select .mat-mdc-floating-label {
+  color: var(--nova-text-on-dark) !important;
+}
+
+:host ::ng-deep .pie-category-select .mat-mdc-text-field-wrapper {
+  padding: 0 8px;
+}
+
+:host ::ng-deep .pie-category-select .mat-mdc-select-arrow svg {
+  fill: var(--nova-text-on-dark) !important;
+}
+
+:host ::ng-deep .pie-category-select .mdc-notched-outline__leading,
+:host ::ng-deep .pie-category-select .mdc-notched-outline__notch,
+:host ::ng-deep .pie-category-select .mdc-notched-outline__trailing {
+  border-color: var(--nova-surface-toast) 8e !important;
+}
+
+/* ลบขีดที่ตัดผ่านตัวหนังสือ label (border-top ของ notch) */
+:host ::ng-deep .pie-category-select .mdc-notched-outline__notch {
+  border-top: none !important;
+}
+
+:host ::ng-deep .donut-chart-container .apexcharts-legend {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  justify-content: center !important;
+  padding: 0 0.75rem 1rem !important; /* เพิ่ม padding ด้านล่าง 1rem */
+  margin-bottom: 10px !important; /* เพิ่ม margin ดันขึ้นจากขอบ */
+}
+
+:host ::ng-deep .donut-chart-container .apexcharts-legend-series {
+  margin: 4px 8px !important;
+}
+
+/* 📱 Responsive Styles for Tablet & Mobile Viewports */
+/* 📱 Responsive Styles for Tablet & Mobile Viewports */
+@media (max-width: 768px) {
+  .donut-chart-container {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    /* เพิ่ม Padding ด้านล่างจาก 1rem เป็น 2.5rem เพื่อให้มีพื้นที่เหลือให้ตัวหนังสือบรรทัดใหม่ */
+    padding: 1.25rem 1rem 2.5rem 1rem;
+    height: auto; /* ปล่อยให้ความสูงขยายตามคอนเทนต์ */
+    min-height: 480px; /* กำหนดความสูงขั้นต่ำที่พอดีกับกราฟและ Legend */
+  }
+
+  .donut-chart-container apx-chart {
+    flex: 1 1 auto;
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+
+  .pie-category-select {
+    position: static;
+    width: 100%;
+
+    order: -1;
+  }
+}
+
+@media (max-width: 480px) {
+  .donut-chart-container {
+    padding: 1rem 0.5rem 2.5rem 0.5rem;
+  }
+
+  .pie-category-select {
+    max-width: 50%;
+  }
+}

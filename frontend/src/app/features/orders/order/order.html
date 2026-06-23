@@ -1,0 +1,240 @@
+@if (person.hasRole('customer')) {
+  <div class="game-manage-container">
+    <main class="main-content-panel">
+      <div class="page-header">
+        <div class="header-left">
+          <h2 class="page-title">Orders</h2>
+          <p class="subtitle">รายการสั่งซื้อทั้งหมด</p>
+        </div>
+
+        <div class="header-actions">
+          <span class="navbar-search-content">
+            <input
+              matInput
+              class="navbar-search-input"
+              type="text"
+              placeholder="Search Game"
+              #searchInput
+              (input)="search(searchInput.value)"
+            />
+            <mat-icon fontIcon="search" class="navbar-search-icon"></mat-icon>
+          </span>
+        </div>
+      </div>
+
+      <!-- Glassmorphic Table Card -->
+      <div class="table-card">
+        <div class="table-responsive">
+          <table class="catalog-table customer-order-table">
+            <thead>
+              <tr>
+                <th class="col-game">GAME</th>
+                <th class="col-date">DATE</th>
+                <th class="col-pricing">PRICING</th>
+                <th class="col-status">STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of pageCustomer" class="table-row" appAnimation>
+                <!-- Game Image & Title -->
+                <td class="col-game">
+                  <div class="game-cell-content">
+                    <div class="cover-image-wrapper non-interactive">
+                      <img
+                        *ngIf="item.image"
+                        [src]="item.image | staticUrl"
+                        alt="game cover"
+                        class="cover-image"
+                      />
+                      <div *ngIf="!item.image" class="cover-placeholder">
+                        <mat-icon>image_not_supported</mat-icon>
+                      </div>
+                    </div>
+                    <div class="title-cell">
+                      <span class="game-name-text">{{ item.game_name }}</span>
+                      <span class="game-id-text">ID: {{ item.game_id }}</span>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Date -->
+                <td class="col-date">
+                  <span class="date-text">{{ item.date | date: 'dd/MM/yyyy HH:mm' }} น.</span>
+                </td>
+
+                <!-- Pricing -->
+                <td class="col-pricing">
+                  <span class="price-text">{{
+                    item.price === 0 ? 'Free' : item.price + ' ฿'
+                  }}</span>
+                </td>
+
+                <!-- Status badge -->
+                <td class="col-status">
+                  <button
+                    class="status-btn"
+                    [class.status-success-customer]="item.is_success"
+                    [class.status-pending]="!item.is_success"
+                    [disabled]="item.is_success"
+                    (click)="payAgain(item)"
+                    [matTooltip]="'ชำระเงิน'"
+                    [matTooltipDisabled]="item.is_success"
+                    matTooltipPosition="above"
+                  >
+                    {{ item.is_success ? 'Paid' : 'Unpaid' }}
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Empty State -->
+              <tr *ngIf="filteredCustomer.length === 0">
+                <td colspan="4" class="empty-table-row">
+                  <mat-icon class="empty-icon">search_off</mat-icon>
+                  <p>ไม่พบรายการออเดอร์</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer" *ngIf="filteredCustomer.length > 0">
+          <span class="table-count">
+            แสดง {{ pageCustomer.length }} จาก {{ filteredCustomer.length }} ออเดอร์
+          </span>
+          <mat-paginator
+            [length]="filteredCustomer.length"
+            [pageSize]="pageSize"
+            [pageIndex]="currentPage"
+            [hidePageSize]="true"
+            aria-label="Customer order pages"
+            (page)="handlePageEvent($event)"
+            class="paginator-container"
+          >
+          </mat-paginator>
+        </div>
+      </div>
+    </main>
+  </div>
+}
+
+@if (person.hasRole('admin') || person.hasRole('owner')) {
+  <div class="game-manage-container">
+    <main class="main-content-panel">
+      <div class="page-header">
+        <div class="header-left">
+          <h2 class="page-title">Orders</h2>
+          <p class="subtitle">รายการสั่งซื้อทั้งหมด</p>
+        </div>
+
+        <div class="header-actions">
+          <span class="navbar-search-content">
+            <input
+              matInput
+              class="navbar-search-input"
+              type="text"
+              placeholder="Search Order"
+              #searchInputAdmin
+              (input)="search(searchInputAdmin.value)"
+            />
+            <mat-icon fontIcon="search" class="navbar-search-icon"></mat-icon>
+          </span>
+        </div>
+      </div>
+
+      <!-- Glassmorphic Table Card -->
+      <div class="table-card">
+        <div class="table-responsive">
+          <table class="catalog-table admin-order-table">
+            <thead>
+              <tr>
+                <th class="col-game">GAME</th>
+                <th class="col-date">DATE</th>
+                <th class="col-pricing">PRICING</th>
+                <th class="col-customer">CUSTOMER</th>
+                <th class="col-status">STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of pageAdmin" class="table-row" appAnimation>
+                <!-- Game Image & Title -->
+                <td class="col-game">
+                  <div class="game-cell-content">
+                    <div class="cover-image-wrapper non-interactive">
+                      <img
+                        *ngIf="item.image"
+                        [src]="item.image | staticUrl"
+                        alt="game cover"
+                        class="cover-image"
+                      />
+                      <div *ngIf="!item.image" class="cover-placeholder">
+                        <mat-icon>image_not_supported</mat-icon>
+                      </div>
+                    </div>
+                    <div class="title-cell">
+                      <span class="game-name-text">{{ item.game_name }}</span>
+                      <span class="game-id-text">ID: {{ item.game_id }}</span>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Date -->
+                <td class="col-date">
+                  <span class="date-text">{{ item.date | date: 'dd/MM/yyyy HH:mm' }} น.</span>
+                </td>
+
+                <!-- Pricing -->
+                <td class="col-pricing">
+                  <span class="price-text">{{
+                    item.price === 0 ? 'Free' : item.price + ' ฿'
+                  }}</span>
+                </td>
+
+                <!-- Customer Name -->
+                <td class="col-customer">
+                  <span class="customer-text">{{ item.first_name }} {{ item.last_name }}</span>
+                </td>
+
+                <!-- Status Action Button -->
+                <td class="col-status">
+                  <button
+                    class="status-btn"
+                    [class.status-success]="item.is_success"
+                    [class.status-pending]="!item.is_success"
+                    [disabled]="item.is_success"
+                    (click)="makeSuccess(item)"
+                  >
+                    {{ item.is_success ? 'Success' : 'Pending' }}
+                  </button>
+                </td>
+              </tr>
+
+              <!-- Empty State -->
+              <tr *ngIf="filteredAdmin.length === 0">
+                <td colspan="5" class="empty-table-row">
+                  <mat-icon class="empty-icon">search_off</mat-icon>
+                  <p>ไม่พบรายการออเดอร์</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer" *ngIf="filteredAdmin.length > 0">
+          <span class="table-count">
+            แสดง {{ pageAdmin.length }} จาก {{ filteredAdmin.length }} ออเดอร์
+          </span>
+          <mat-paginator
+            [length]="filteredAdmin.length"
+            [pageSize]="pageSize"
+            [pageIndex]="currentPage"
+            [hidePageSize]="true"
+            aria-label="Admin order pages"
+            (page)="handlePageEvent($event)"
+            class="paginator-container"
+          >
+          </mat-paginator>
+        </div>
+      </div>
+    </main>
+  </div>
+}

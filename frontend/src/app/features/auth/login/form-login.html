@@ -1,0 +1,71 @@
+<!-- @for (item of game; track item.id) {
+  <div>
+    {{ item.title }}
+
+    {{ item.price }}
+  </div>
+} -->
+
+<div class="form-Container">
+  <mat-card class="form-img-content">
+    <img mat-card-image src="/LoginImg/IconImg2.png" alt="Card" width="100%" height="100%" />
+  </mat-card>
+
+  <div class="form-main-container">
+    <div class="form-main-content">
+      <mat-card class="form-main-icon">
+        <img src="/LoginImg/IconImg2.png" alt="" width="100%" />
+      </mat-card>
+
+      <h2>Login</h2>
+
+      <label class="form-main-label">Username</label>
+      <mat-form-field appearance="outline" hideRequiredMarker="true">
+        <mat-label class="placeholder">Ex Jacker *</mat-label>
+        <input [formControl]="user" matInput #userName />
+        <mat-icon matSuffix class="form-main-user-icon">person</mat-icon>
+      </mat-form-field>
+
+      <label class="form-main-label">Password</label>
+      <mat-form-field appearance="outline" hideRequiredMarker="true">
+        <mat-label class="placeholder">*********</mat-label>
+        <input [formControl]="pass" matInput [type]="hidePassword ? 'password' : 'text'" />
+
+        <mat-icon
+          matIconSuffix
+          (click)="hidePassword = !hidePassword; $event.preventDefault(); $event.stopPropagation()"
+          >{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon
+        >
+      </mat-form-field>
+
+      <button
+        tabindex="0"
+        matButton="filled"
+        [disabled]="pass.invalid || user.invalid || isLoading()"
+        (click)="toLogin()"
+        style="border-radius: 5px"
+      >
+        Login
+      </button>
+
+      <div class="form-main-error-wrapper">
+        @if (apiMessage()) {
+          <mat-error class="form-main-mat-error">
+            <mat-icon class="form-main-error-icon">error_outline</mat-icon>
+            {{ apiMessage() }}
+          </mat-error>
+        }
+      </div>
+
+      <mat-divider style="margin: 1rem 0"></mat-divider>
+
+      <div class="register-container">
+        <span class="register-label">ยังไม่มีสมาชิก?</span>
+        <button matButton class="register-btn" (click)="register()">
+          <mat-icon>person_add</mat-icon>
+          สมัครสมาชิก
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

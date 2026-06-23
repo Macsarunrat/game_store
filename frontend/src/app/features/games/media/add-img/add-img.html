@@ -1,0 +1,91 @@
+<div class="dialog-shell">
+  <header class="dialog-header">
+    <div class="dialog-icon">
+      <mat-icon>add_photo_alternate</mat-icon>
+    </div>
+    <div class="header-titles">
+      <p class="eyebrow">NOVA STORE</p>
+      <h2>เพิ่มไฟล์สื่อ (Add Media)</h2>
+      <p class="dialog-subtitle">รูปภาพ (.png, .jpg, .jpeg) หรือวิดีโอ (.mp4)</p>
+    </div>
+  </header>
+
+  <section class="form-grid">
+    <label class="field-row">
+      <span class="field-label">
+        <mat-icon>photo</mat-icon>
+        <strong>ภาพหลัก (Cover)</strong>
+      </span>
+      <mat-form-field appearance="outline">
+        <mat-label>ตั้งเป็นภาพหน้าปกหลัก?</mat-label>
+        <mat-select [formControl]="choice">
+          @for (item of choiceList; track item) {
+            <mat-option [value]="item">
+              {{ item ? 'ใช่ (เป็นภาพปกหลัก)' : 'ไม่ใช่ (เป็นภาพ/วิดีโอประกอบ)' }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </label>
+
+    <div class="field-row">
+      <span class="field-label">
+        <mat-icon>attach_file</mat-icon>
+        <strong>เลือกไฟล์</strong>
+      </span>
+      <div class="media-upload-area">
+        <button
+          mat-stroked-button
+          class="btn-file-select"
+          (click)="fileInput.click()"
+          [disabled]="previewImages.length >= 1"
+        >
+          <mat-icon>file_upload</mat-icon>
+          <span>เลือกรูปภาพหรือวิดีโอ...</span>
+        </button>
+        <input
+          type="file"
+          #fileInput
+          hidden
+          accept="image/jpg, image/jpeg, image/png, video/mp4"
+          multiple
+          (change)="onFileSelected($event)"
+        />
+      </div>
+    </div>
+
+    <!-- Preview Area -->
+    <div class="preview-section">
+      <span class="section-title">ตัวอย่างไฟล์:</span>
+      <div class="image-preview-container">
+        @for (item of previewImages; track $index) {
+          <div class="image-item">
+            @if (item.file.name.endsWith('.mp4')) {
+              <div class="video-preview-wrapper">
+                <mat-icon class="video-icon">videocam</mat-icon>
+                <span class="video-name">{{ item.file.name }}</span>
+              </div>
+            } @else {
+              <img [src]="item.url" class="img-preview" />
+            }
+            <button class="delete-btn" (click)="removePreview($index)" title="ลบรายการนี้">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        } @empty {
+          <div class="image-empty">
+            <mat-icon class="empty-icon">image</mat-icon>
+            <p class="image-empty-text">ไฟล์ของคุณจะปรากฏที่นี่</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <footer class="dialog-actions">
+    <button mat-flat-button class="primary-action" (click)="UpdateImg()" [disabled]="previewImages.length === 0">
+      <mat-icon>cloud_upload</mat-icon>
+      <span>อัปโหลดไฟล์สื่อ</span>
+    </button>
+  </footer>
+</div>

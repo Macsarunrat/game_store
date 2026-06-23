@@ -1,0 +1,430 @@
+.game-detail-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  margin-top: auto; /* ดันข้อมูลลงมาล่างสุด เพื่อให้ชื่อเกมตรงกันเสมอ */
+  /* เว้นระยะห่างด้านบน */
+}
+
+.game-name-container {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+}
+
+.game-name {
+  min-width: 0;
+  max-width: 200px;
+  white-space: nowrap; /* ห้ามขึ้นบรรทัดใหม่ */
+  overflow: hidden; /* ซ่อนส่วนที่ล้น */
+  text-overflow: ellipsis; /* เติม ... เมื่อข้อความล้น */
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.game-price-container {
+  padding: 0 8px;
+}
+
+.game-price {
+  flex-shrink: 0;
+  white-space: nowrap; /* ป้องกันราคาตกบรรทัด */
+  font-weight: bold;
+  color: var(--nova-success);
+}
+
+.mat-categories {
+  flex-wrap: wrap; /* เปลี่ยนเป็น wrap ให้ปุ่มหมวดหมู่ตัดบรรทัดได้หากยาวเกินไป */
+  display: flex;
+  margin-top: 1rem;
+  gap: 0.4rem;
+}
+
+.mat-categories-btn {
+  background: var(--nova-accent-hover) !important; /* เปลี่ยนเป็นสีเหลืองเพื่อคงธีมสวยงาม */
+  color: white !important;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  height: 28px !important;
+  line-height: 28px !important;
+  padding: 0 10px !important;
+  width: auto !important; /* ป้องกันไม่ให้แผ่กว้างเต็มกล่องแม่ */
+  flex-shrink: 0;
+}
+
+.cate-label {
+  font-size: 1.2rem;
+  padding-right: 8px;
+  font-weight: 600;
+  padding-bottom: 0.3rem;
+  border-right: 3px solid var(--nova-accent-hover);
+}
+
+.mat-cate-list {
+  height: auto;
+}
+
+.mat-cate-list p {
+  color: white;
+}
+
+.is-selected {
+  opacity: 0.4;
+}
+
+/* Shared button base */
+.btn-cancel,
+.btn-confirm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: 120px;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel mat-icon,
+.btn-confirm mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Cancel — red */
+.btn-cancel {
+  background: rgba(209, 66, 73, 0.15);
+  color: var(--nova-danger);
+  border: 1px solid rgba(209, 66, 73, 0.4);
+}
+
+.btn-cancel:hover {
+  background: rgba(209, 66, 73, 0.28);
+  border-color: var(--nova-danger);
+  transform: translateY(-1px);
+}
+
+/* Confirm — green */
+.btn-confirm {
+  background: rgba(46, 125, 50, 0.2);
+  color: var(--nova-success-material);
+  border: 1px solid rgba(46, 125, 50, 0.45);
+}
+
+.btn-confirm:hover {
+  background: rgba(46, 125, 50, 0.35);
+  border-color: var(--nova-success-material);
+  transform: translateY(-1px);
+}
+
+.btn-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.is-delete {
+  cursor: pointer;
+}
+
+.all-container {
+  display: flex;
+  color: white;
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--nova-gradient-page);
+}
+
+.sidebar-container {
+  display: flex;
+  flex-direction: column;
+  width: 16vw;
+  height: calc(100vh - 64px); /* สอดคล้องกับความสูงของ navbar */
+  background: var(--nova-gradient-sidebar);
+  color: white;
+  margin-top: 64px;
+  overflow-y: auto;
+}
+
+.sidebar-textbox {
+  margin-top: 2rem; /* ปรับลดลงเล็กน้อยจาก 4rem เพื่อความสมดุล */
+  padding: 1rem;
+}
+
+.navbar-search-content {
+  display: flex;
+  margin-right: 0; /* ลดลงเหลือ 0 เพื่อให้จัดกลางได้ง่าย */
+  width: 100%; /* ปรับให้กว้างเต็มกล่องแม่ */
+  max-width: 220px;
+  height: 2.5rem;
+  align-items: center;
+  background-color: var(--nova-primary);
+  padding: 0 1rem; /* ปรับลด padding จาก 2rem เพื่อไม่ให้ input แคบเกินไป */
+  border-radius: 2rem;
+  box-sizing: border-box;
+}
+
+.navbar-search-input {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+}
+
+.navbar-search-icon {
+  display: flex;
+  text-align: center;
+}
+
+.main-content-container {
+  flex: 1;
+  height: calc(100vh - 64px);
+  padding: 1.5rem;
+  display: flex;
+  margin-top: 64px;
+  flex-direction: column;
+  background: var(--nova-overlay-glass) !important;
+  backdrop-filter: blur(10px);
+  overflow-y: auto; /* เปิดให้เลื่อนหน้าจอแนวตั้งได้ */
+  box-sizing: border-box;
+}
+
+.owner-btn-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap; /* ให้ปุ่มตกบรรทัดใหม่ได้เมื่อหน้าจอเล็กมาก */
+  gap: 1rem;
+  flex-shrink: 0;
+  margin-bottom: 1rem;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  color: white;
+}
+
+.clear-selected {
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  margin-left: auto;
+  color: white;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+
+  mat-icon {
+    color: red;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+  }
+}
+
+.owner-btn-box {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.owner-create-btn {
+  min-width: 100px;
+  background-color: var(--nova-success);
+  border-radius: 15px;
+}
+.owner-delete-btn {
+  min-width: 100px;
+  background-color: red;
+  border-radius: 15px;
+}
+
+.paginator-container {
+  background: transparent;
+  color: white;
+  margin-left: auto;
+}
+
+/*  ระบบ Responsive CSS Grid สำหรับรายการเกม */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+  width: 100%;
+  padding-bottom: 2rem;
+}
+
+.grid-content {
+  background: rgba(20, 19, 93, 0.4);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  border: 1px solid var(--nova-border-subtle);
+  height: 100%; /* ยืดความสูงเต็มเซลล์กริดในแถวนั้นๆ */
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.card-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%; /* ยืดเต็มส่วนสูงของกล่องแม่ */
+  flex: 1; /* ช่วยให้ดันเนื้อหาได้เต็มพื้นที่ */
+}
+
+.img-wrapper-container {
+  width: 100%;
+  height: 160px; /* ใช้ความสูงคงที่ระดับพอเหมาะ */
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+}
+
+.card-img-list {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* ตัดขนาดภาพอัตโนมัติไม่ให้บิดเบี้ยว */
+}
+
+.empty-img-container {
+  height: 160px;
+  background-color: var(--nova-surface-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.mat-categories-btn {
+  background: var(--nova-accent-hover);
+  color: white !important;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  height: 28px !important;
+  line-height: 28px !important;
+  padding: 0 10px !important;
+}
+
+.empty-img-container p {
+  color: var(--nova-text-hint);
+}
+
+.mat-cate-list.is-category-selected {
+  border-left: 3px solid var(--nova-accent);
+  color: var(--nova-accent);
+}
+
+.category-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.category-hamburger-btn {
+  display: none !important;
+}
+
+/* 📱 Responsive สำหรับแท็บเล็ตและมือถือ */
+@media (max-width: 768px) {
+  .category-hamburger-btn {
+    display: inline-flex !important;
+    color: white;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    min-width: 0 !important;
+    justify-content: center;
+    align-items: center;
+  }
+
+  mat-selection-list.collapsed .mat-cate-list {
+    display: none !important;
+  }
+
+  .all-container {
+    flex-direction: column;
+    height: auto;
+    overflow-y: auto;
+  }
+
+  .sidebar-container {
+    width: 100%;
+    height: auto;
+    margin-top: 64px;
+    border-bottom: 1px solid var(--nova-border-subtle);
+  }
+
+  .sidebar-textbox {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .navbar-search-content {
+    max-width: 100%;
+    width: 250px;
+  }
+
+  .category-header {
+    padding: 0.5rem 1rem;
+  }
+
+  .main-content-container {
+    width: 100%;
+    height: auto;
+    margin-top: 0;
+    padding: 1rem;
+  }
+
+  .owner-btn-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .owner-btn-box {
+    justify-content: center;
+  }
+
+  .paginator-container {
+    width: 400px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .games-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .img-wrapper-container,
+  .empty-img-container {
+    height: 120px; /* ลดความสูงของรูปภาพเมื่อแสดงบนจอเล็ก */
+  }
+}

@@ -41,7 +41,7 @@ async def upload_image(db: DbSession,body : Annotated[ImageUpload,Depends(cast_t
 
     await asyncio.to_thread(save_and_upload,file_path, file.file)
 
-    image_id = await crud_image.save_fimename(db=db,filename=str(file_path.as_posix()),is_main=is_main,game_id=game_id)
+    image_id = await crud_image.save_fimename(db=db,filename=file.filename,is_main=is_main,game_id=game_id)
     await cache.delete("game:all:")
     background_task.add_task(crud_logs.image_log,db,user_id,image_id,"UPLOAD",request.client.host)
 

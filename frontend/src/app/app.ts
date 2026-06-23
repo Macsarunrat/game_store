@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { OnInit } from '@angular/core';
@@ -9,7 +9,7 @@ import { GameService } from './features/games/services/game.service';
 import { OrderStateService } from './features/orders/services/order-state.service';
 import { NotificationService } from './features/notifications/services/notification.service';
 import { AuthService } from './core/auth/auth';
-import { filter } from 'rxjs';
+import { filter, Subscription } from 'rxjs';
 import { LoadingService } from './core/services/loading.service';
 
 @Component({
@@ -18,17 +18,39 @@ import { LoadingService } from './core/services/loading.service';
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App implements OnInit {
+export class App implements OnInit, OnDestroy {
   protected readonly title = signal('test-angular');
   protected readonly loadingService = inject(LoadingService);
   private auth = inject(AuthService);
   private gameService = inject(GameService);
   private orderState = inject(OrderStateService);
   private notificationService = inject(NotificationService);
+  private notificationSub?: Subscription;
+  private authSub?: Subscription;
 
   ngOnInit() {
+    this.authSub = this.auth.currentUser.subscribe((user) => {
+      this.setupNotifications();
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.notificationSub) this.notificationSub.unsubscribe();
+    if (this.authSub) this.authSub.unsubscribe();
+  }
+
+  private setupNotifications() {
+    if (this.notificationSub) {
+      this.notificationSub.unsubscribe();
+      this.notificationSub = undefined;
+    }
+
+    if (!this.auth.currentUserValue) {
+      return;
+    }
+
     if (this.auth.hasRole('admin') || this.auth.hasRole('owner')) {
-      this.notificationService
+      this.notificationSub = this.notificationService
         .ownerNotify()
         .pipe(filter((t) => t.type === 'orderNotify'))
         .subscribe({
@@ -71,8 +93,8 @@ export class App implements OnInit {
           },
           error: (err) => console.error('err_notify', err),
         });
-    } else {
-      this.notificationService.customerNotify().subscribe({
+    } else if (this.auth.hasRole('customer')) {
+      this.notificationSub = this.notificationService.customerNotify().subscribe({
         next: (res) => {
           this.gameService.clearGameCache();
           console.log('res customer', res);

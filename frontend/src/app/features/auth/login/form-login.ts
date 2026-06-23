@@ -101,7 +101,7 @@ export class FormLogin implements OnInit {
           timer: 2000,
           topLayer: true,
           showConfirmButton: false,
-          text: err.error.message || 'Something went wrong',
+          text: 'Username or Password incorrect',
           ...novaSwalConfirmPrimary(),
           scrollbarPadding: false,
           ...novaSwalDarkBase(),

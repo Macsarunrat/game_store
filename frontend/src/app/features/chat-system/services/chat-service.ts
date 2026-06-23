@@ -23,7 +23,9 @@ export class ChatService {
   getChat() {
     // ถ้ายังไม่มีท่อ หรือท่อปิดไปแล้ว ให้สร้างใหม่รอบเดียว
     if (!this.socket$ || this.socket$.closed) {
-      this.socket$ = webSocket('ws://192.168.1.66:8000/api/v1/chat/ws/me');
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsHost = window.location.host;
+      this.socket$ = webSocket(`${wsProtocol}//${wsHost}/api/v1/chat/ws/me`);
     }
     return this.socket$; //
   }

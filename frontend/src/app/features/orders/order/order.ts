@@ -13,6 +13,7 @@ import {
   takeUntil,
   debounceTime,
   distinctUntilChanged,
+  Subscription,
 } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { StaticUrlPipe } from '../../../shared/pipes/static-url-pipe';
@@ -51,6 +52,7 @@ export class Order implements OnInit, OnDestroy {
 
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
+  private notificationSub?: Subscription;
   private currentSearchTerm = '';
 
   gameAdmin: any[] = [];
@@ -101,8 +103,23 @@ export class Order implements OnInit, OnDestroy {
       this.loadOrder();
     });
 
+    this.person.currentUser.pipe(takeUntil(this.destroy$)).subscribe((user) => {
+      this.setupNotifications();
+    });
+  } // end ngOnInit
+
+  private setupNotifications() {
+    if (this.notificationSub) {
+      this.notificationSub.unsubscribe();
+      this.notificationSub = undefined;
+    }
+
+    if (!this.person.currentUserValue) {
+      return;
+    }
+
     if (this.person.hasRole('admin') || this.person.hasRole('owner')) {
-      this.notificationService
+      this.notificationSub = this.notificationService
         .ownerNotify()
         .pipe(
           filter((t) => t.type === 'orderConfirm'),
@@ -125,11 +142,9 @@ export class Order implements OnInit, OnDestroy {
             console.error('orderError', err);
           },
         });
-    }
-
-    // ลูกค้า: รับ SSE notification เมื่อ admin ยืนยัน order
-    if (this.person.hasRole('customer')) {
-      this.notificationService
+    } else if (this.person.hasRole('customer')) {
+      // ลูกค้า: รับ SSE notification เมื่อ admin ยืนยัน order
+      this.notificationSub = this.notificationService
         .customerNotify()
         .pipe(takeUntil(this.destroy$))
         .subscribe({
@@ -153,7 +168,7 @@ export class Order implements OnInit, OnDestroy {
           },
         });
     }
-  } // end ngOnInit
+  }
 
   search(text: string) {
     this.searchSubject.next(text);

@@ -227,31 +227,37 @@ html {
   width: 200px;
   height: 100px;
   background-color: var(--nova-overlay-glass);
-  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border: 1px dashed rgba(255, 255, 255, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .empty-image-icon p {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.6);
   text-align: center;
+  font-weight: 500;
+  margin: 0;
 }
 
 .empty-image-slide-container {
-  width: 100%;
+  width: 300px;
   height: 170px;
   background-color: var(--nova-overlay-glass);
-  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border: 1px dashed rgba(255, 255, 255, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 .empty-image-slide-container p {
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  margin: 0;
 }
 
 /* 📱 Responsive Styles for Mobile & Tablet */

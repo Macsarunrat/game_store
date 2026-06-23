@@ -24,7 +24,7 @@ services:
 
   db:
     image: postgres:17
-    restart : always
+    restart: always
     volumes:
       - postgres-data:/var/lib/postgresql/data
     env_file:
@@ -36,11 +36,10 @@ services:
 
   frontend:
     build: ./frontend
-    depends_on: 
+    depends_on:
       - backend
-    ports: 
+    ports:
       - "4200:80"
-  
+
 volumes:
   postgres-data:
-
